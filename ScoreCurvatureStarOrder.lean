@@ -1,1 +1,2 @@
 import ScoreCurvatureStarOrder.Basic
+import ScoreCurvatureStarOrder.Entropy
