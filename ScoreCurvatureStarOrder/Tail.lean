@@ -90,7 +90,7 @@ theorem theta_le_exp_tail
     have hz0 : z ∈ Set.Ici (0 : ℝ) := hR.trans hz
     have hexp : HasDerivAt (fun y : ℝ => Real.exp (c * y))
         (Real.exp (c * z) * c) z := by
-      exact ((hasDerivAt_id z).const_mul c).exp
+      simpa using ((hasDerivAt_id z).const_mul c).exp
     exact (hexp.mul (htheta_deriv z hz0)).continuousAt.continuousWithinAt
   have hder :
       ∀ z ∈ interior (Set.Ici R),
@@ -103,7 +103,7 @@ theorem theta_le_exp_tail
     have hz0 : z ∈ Set.Ici (0 : ℝ) := hR.trans hzR
     have hexp : HasDerivAt (fun y : ℝ => Real.exp (c * y))
         (Real.exp (c * z) * c) z := by
-      exact ((hasDerivAt_id z).const_mul c).exp
+      simpa using ((hasDerivAt_id z).const_mul c).exp
     exact (hexp.mul (htheta_deriv z hz0)).hasDerivWithinAt
   have hnonpos :
       ∀ z ∈ interior (Set.Ici R),
