@@ -115,15 +115,16 @@ theorem powerWeightedShift_integrableOn_Ioi
         _ ≤ theta R * (Real.exp (c * R) * Real.exp (-c * x)) :=
           mul_le_mul_of_nonneg_left hexp_le (htheta_pos R hR).le
         _ = (theta R * Real.exp (c * R)) * Real.exp (-c * x) := by ring
-    have hxpow : 0 ≤ x ^ p := Real.rpow_nonneg x p
+    have hxpow : 0 ≤ x ^ p := Real.rpow_nonneg hx0.le p
     have hprod : x ^ p * theta (a + x) ≤ K * (x ^ p * Real.exp (-c * x)) := by
       calc
         x ^ p * theta (a + x) ≤ x ^ p * (K * Real.exp (-c * x)) :=
           mul_le_mul_of_nonneg_left htheta_bound hxpow
         _ = K * (x ^ p * Real.exp (-c * x)) := by ring
-    rw [Real.norm_eq_abs,
-      abs_of_nonneg (mul_nonneg hxpow (htheta_pos (a + x) hax0).le),
-      abs_of_nonneg (mul_nonneg hKpos.le (mul_nonneg hxpow (Real.exp_pos (-c * x)).le))]
-    exact hprod
+    have hf_nonneg : 0 ≤ x ^ p * theta (a + x) :=
+      mul_nonneg hxpow (htheta_pos (a + x) hax0).le
+    have hg_nonneg : 0 ≤ K * (x ^ p * Real.exp (-c * x)) :=
+      mul_nonneg hKpos.le (mul_nonneg hxpow (Real.exp_pos (-c * x)).le)
+    simpa [Real.norm_eq_abs, abs_of_nonneg hf_nonneg, abs_of_nonneg hg_nonneg] using hprod
 
 end ScoreCurvatureStarOrder
