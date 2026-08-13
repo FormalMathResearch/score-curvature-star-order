@@ -4,6 +4,7 @@ import ScoreCurvatureStarOrder.Tail
 namespace ScoreCurvatureStarOrder
 
 open Set Filter
+open scoped Topology
 
 /-- For `p > -1`, the integration-by-parts boundary term vanishes at the origin. -/
 theorem powerWeightedShift_boundary_zero
