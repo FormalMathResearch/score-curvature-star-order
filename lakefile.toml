@@ -1,6 +1,6 @@
 name = "score_curvature_star_order"
 version = "0.1.0"
-defaultTargets = ["ScoreCurvatureStarOrder"]
+defaultTargets = ["ScoreCurvatureStarOrder", "Score_curvature_star_order"]
 
 [leanOptions]
 autoImplicit = false
@@ -12,3 +12,6 @@ rev = "v4.33.0"
 
 [[lean_lib]]
 name = "ScoreCurvatureStarOrder"
+
+[[lean_lib]]
+name = "Score_curvature_star_order"
