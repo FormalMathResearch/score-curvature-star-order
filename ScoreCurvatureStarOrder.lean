@@ -3,3 +3,4 @@ import ScoreCurvatureStarOrder.Entropy
 import ScoreCurvatureStarOrder.TwoPointKernel
 import ScoreCurvatureStarOrder.ScoreRatio
 import ScoreCurvatureStarOrder.GlobalKernel
+import ScoreCurvatureStarOrder.Tail
