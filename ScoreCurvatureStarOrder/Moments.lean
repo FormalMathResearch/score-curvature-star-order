@@ -125,6 +125,8 @@ theorem powerWeightedShift_integrableOn_Ioi
       mul_nonneg hxpow (htheta_pos (a + x) hax0).le
     have hg_nonneg : 0 ≤ K * (x ^ p * Real.exp (-c * x)) :=
       mul_nonneg hKpos.le (mul_nonneg hxpow (Real.exp_pos (-c * x)).le)
-    simpa [Real.norm_eq_abs, abs_of_nonneg hf_nonneg, abs_of_nonneg hg_nonneg] using hprod
+    simp only [Real.norm_eq_abs]
+    rw [abs_of_nonneg hf_nonneg, abs_of_nonneg hg_nonneg]
+    exact hprod
 
 end ScoreCurvatureStarOrder
