@@ -89,31 +89,38 @@ theorem theta_le_exp_tail
     intro z hz
     have hz0 : z ∈ Set.Ici (0 : ℝ) := hR.trans hz
     have hexp : HasDerivAt (fun y : ℝ => Real.exp (c * y))
-        (c * Real.exp (c * z)) z := by
-      convert (Real.hasDerivAt_exp (c * z)).comp z ((hasDerivAt_id z).const_mul c) using 1 <;> ring
+        (Real.exp (c * z) * c) z := by
+      exact ((hasDerivAt_id z).const_mul c).exp
     exact (hexp.mul (htheta_deriv z hz0)).continuousAt.continuousWithinAt
   have hder :
       ∀ z ∈ interior (Set.Ici R),
         HasDerivWithinAt (fun y : ℝ => Real.exp (c * y) * theta y)
-          (Real.exp (c * z) * theta z * (c - S z))
+          ((Real.exp (c * z) * c) * theta z +
+            Real.exp (c * z) * (-S z * theta z))
           (interior (Set.Ici R)) z := by
     intro z hz
     have hzR : R ≤ z := interior_subset hz
     have hz0 : z ∈ Set.Ici (0 : ℝ) := hR.trans hzR
     have hexp : HasDerivAt (fun y : ℝ => Real.exp (c * y))
-        (c * Real.exp (c * z)) z := by
-      convert (Real.hasDerivAt_exp (c * z)).comp z ((hasDerivAt_id z).const_mul c) using 1 <;> ring
-    have hprod := hexp.mul (htheta_deriv z hz0)
-    convert hprod.hasDerivWithinAt using 1 <;> ring
+        (Real.exp (c * z) * c) z := by
+      exact ((hasDerivAt_id z).const_mul c).exp
+    exact (hexp.mul (htheta_deriv z hz0)).hasDerivWithinAt
   have hnonpos :
       ∀ z ∈ interior (Set.Ici R),
-        Real.exp (c * z) * theta z * (c - S z) ≤ 0 := by
+        (Real.exp (c * z) * c) * theta z +
+            Real.exp (c * z) * (-S z * theta z) ≤ 0 := by
     intro z hz
     have hzR : R ≤ z := interior_subset hz
     have hz0 : z ∈ Set.Ici (0 : ℝ) := hR.trans hzR
     have hfac : 0 ≤ Real.exp (c * z) * theta z :=
       mul_nonneg (Real.exp_pos _).le (htheta_pos z hz0).le
     have hdiff : c - S z ≤ 0 := sub_nonpos.mpr (hS_lower z hzR)
+    have hfactor :
+        (Real.exp (c * z) * c) * theta z +
+            Real.exp (c * z) * (-S z * theta z) =
+          (Real.exp (c * z) * theta z) * (c - S z) := by
+      ring
+    rw [hfactor]
     exact mul_nonpos_of_nonneg_of_nonpos hfac hdiff
   have hanti : AntitoneOn (fun z => Real.exp (c * z) * theta z) (Set.Ici R) :=
     antitoneOn_of_hasDerivWithinAt_nonpos (convex_Ici R) hcont hder hnonpos
