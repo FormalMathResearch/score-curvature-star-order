@@ -24,7 +24,7 @@ theorem powerWeightedShift_boundary_zero
     have hfull_cont : ContinuousAt (fun x : ℝ => a + x) 0 := by
       fun_prop
     have hfull : Tendsto (fun x : ℝ => a + x) (𝓝 0) (𝓝 a) := by
-      simpa using hfull_cont
+      simpa using hfull_cont.tendsto
     exact hfull.mono_left inf_le_left
   have htheta :
       Tendsto (fun x : ℝ => theta (a + x))
