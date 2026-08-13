@@ -86,7 +86,8 @@ theorem logRatio_le_tangent
     have hslope' :
         (Real.log (S t) - Real.log (S x)) / (t - x) ≤
           Sprime x / S x := by
-      simpa [slope] using hslope
+      rw [slope_def_field] at hslope
+      exact hslope
     have hdiff :
         Real.log (S t) - Real.log (S x) ≤
           (Sprime x / S x) * (t - x) :=
@@ -100,7 +101,8 @@ theorem logRatio_le_tangent
     have hslope' :
         Sprime x / S x ≤
           (Real.log (S x) - Real.log (S t)) / (x - t) := by
-      simpa [slope] using hslope
+      rw [slope_def_field] at hslope
+      exact hslope
     have hdiffPos :
         (Sprime x / S x) * (x - t) ≤
           Real.log (S x) - Real.log (S t) :=
