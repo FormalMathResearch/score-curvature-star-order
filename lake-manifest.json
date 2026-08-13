@@ -111,7 +111,7 @@
       "configFile": "lakefile.toml"
     }
   ],
-  "name": "score-curvature-star-order",
+  "name": "score_curvature_star_order",
   "lakeDir": ".lake",
   "fixedToolchain": true
 }

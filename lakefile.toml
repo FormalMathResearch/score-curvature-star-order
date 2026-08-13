@@ -1,4 +1,4 @@
-name = "score-curvature-star-order"
+name = "score_curvature_star_order"
 version = "0.1.0"
 defaultTargets = ["ScoreCurvatureStarOrder"]
 
