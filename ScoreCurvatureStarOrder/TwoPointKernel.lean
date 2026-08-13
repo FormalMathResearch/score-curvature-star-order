@@ -3,7 +3,7 @@ import ScoreCurvatureStarOrder.Entropy
 
 namespace ScoreCurvatureStarOrder
 
-def twoPointKernel (S : ℝ → ℝ) (a x t : ℝ) : ℝ :=
+noncomputable def twoPointKernel (S : ℝ → ℝ) (a x t : ℝ) : ℝ :=
   deriv S (a + x) * (t - x) * S (a + t) -
     S (a + x) * (S (a + t) - S (a + x))
 
