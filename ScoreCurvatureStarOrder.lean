@@ -1,4 +1,5 @@
 import ScoreCurvatureStarOrder.Basic
+import ScoreCurvatureStarOrder.HalfLineRegularity
 import ScoreCurvatureStarOrder.Entropy
 import ScoreCurvatureStarOrder.TwoPointKernel
 import ScoreCurvatureStarOrder.ScoreRatio
