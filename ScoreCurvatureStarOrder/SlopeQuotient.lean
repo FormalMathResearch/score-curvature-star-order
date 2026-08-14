@@ -20,8 +20,46 @@ noncomputable def powerWeightedShiftSlopeKernel
     S (a + x) ^ 2 -
       powerWeightedShiftScoreMean theta S a p * S (a + x)
 
-/-- Wherever `D'(x) ≠ 0`, the ratio of the already verified derivative formulas for
-`A` and `D` reduces to the manuscript quotient `q`. -/
+/-- Wherever `D'(x) ≠ 0`, the ratio of the verified derivative formulas for
+`A` and `D` reduces to the manuscript quotient `q`, under only one-sided
+half-line differentiability assumptions. -/
+theorem powerWeightedShift_APrime_div_DPrime_eq_slopeQuotient_within
+    {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p) (hx : 0 < x)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z)
+    (hden : p + 1 - x * S (a + x) ≠ 0) :
+    deriv (fun y : ℝ =>
+      powerWeightedShiftCumulativeShiftNumerator theta S a p y) x /
+      deriv (fun y : ℝ => powerWeightedShiftRadialDensity theta a p y) x =
+        powerWeightedShiftSlopeQuotient theta S a p x := by
+  have hA := powerWeightedShiftCumulativeShiftNumerator_hasDerivAt_within
+    (theta := theta) (S := S) (Sprime := Sprime)
+    (a := a) (p := p) (x := x) ha hp hx htheta_deriv hS
+  have hD := powerWeightedShiftRadialDensity_hasDerivAt_within
+    (theta := theta) (S := S) (Sprime := Sprime)
+    (a := a) (p := p) (x := x) ha hp hx htheta_pos htheta_deriv htheta_int hS
+    hSprime_pos
+  have hMpos : 0 < powerWeightedShiftMoment theta a p :=
+    powerWeightedShiftMoment_pos_within
+      ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
+  have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
+  have hrpow_pos : 0 < x ^ p := Real.rpow_pos_of_pos hx p
+  have hdensity_pos : 0 < powerWeightedShiftDensity theta a p x := by
+    dsimp [powerWeightedShiftDensity]
+    exact div_pos (mul_pos hrpow_pos (htheta_pos (a + x) hax0)) hMpos
+  have hdensity_ne : powerWeightedShiftDensity theta a p x ≠ 0 := hdensity_pos.ne'
+  rw [hA.deriv, hD.deriv]
+  dsimp [powerWeightedShiftSlopeQuotient]
+  field_simp [hdensity_ne, hden]
+
+/-- Backward-compatible version of the `A'/D'=q` bridge under the former
+two-sided boundary assumptions. -/
 theorem powerWeightedShift_APrime_div_DPrime_eq_slopeQuotient
     {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
     (ha : 0 ≤ a) (hp : -1 < p) (hx : 0 < x)
@@ -35,25 +73,12 @@ theorem powerWeightedShift_APrime_div_DPrime_eq_slopeQuotient
       powerWeightedShiftCumulativeShiftNumerator theta S a p y) x /
       deriv (fun y : ℝ => powerWeightedShiftRadialDensity theta a p y) x =
         powerWeightedShiftSlopeQuotient theta S a p x := by
-  have hA := powerWeightedShiftCumulativeShiftNumerator_hasDerivAt
-    (theta := theta) (S := S) (Sprime := Sprime)
-    (a := a) (p := p) (x := x) ha hp hx htheta_deriv hS
-  have hD := powerWeightedShiftRadialDensity_hasDerivAt
-    (theta := theta) (S := S) (Sprime := Sprime)
-    (a := a) (p := p) (x := x) ha hp hx htheta_pos htheta_deriv htheta_int hS
-    hSprime_pos
-  have hMpos : 0 < powerWeightedShiftMoment theta a p :=
-    powerWeightedShiftMoment_pos
-      ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
-  have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
-  have hrpow_pos : 0 < x ^ p := Real.rpow_pos_of_pos hx p
-  have hdensity_pos : 0 < powerWeightedShiftDensity theta a p x := by
-    dsimp [powerWeightedShiftDensity]
-    exact div_pos (mul_pos hrpow_pos (htheta_pos (a + x) hax0)) hMpos
-  have hdensity_ne : powerWeightedShiftDensity theta a p x ≠ 0 := hdensity_pos.ne'
-  rw [hA.deriv, hD.deriv]
-  dsimp [powerWeightedShiftSlopeQuotient]
-  field_simp [hdensity_ne, hden]
+  exact powerWeightedShift_APrime_div_DPrime_eq_slopeQuotient_within
+    ha hp hx htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos hden
 
 /-- The manuscript quotient satisfies
 `q'(x) = -K(x) / (p+1-x S(a+x))^2` at every strictly positive point where its
