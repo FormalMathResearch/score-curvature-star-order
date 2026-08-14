@@ -6,14 +6,20 @@ namespace ScoreCurvatureStarOrder
 open Set MeasureTheory Filter
 open scoped Topology
 
-/-- Integration by parts for the score-weighted shifted moment. -/
-theorem powerWeightedShift_score_moment_identity
+/-- Integration by parts for the score-weighted shifted moment under the
+mathematically natural one-sided differentiability assumptions on `[0, ∞)`.
+The ordinary derivatives required by the improper integration-by-parts theorem
+are recovered only at the strictly positive interior points where they are
+actually used. -/
+theorem powerWeightedShift_score_moment_identity_within
     {theta S Sprime : ℝ → ℝ} {a p : ℝ}
     (ha : 0 ≤ a) (hp : -1 < p)
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
     (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
-    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
     (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
     (∫ x : ℝ in Set.Ioi 0,
         x ^ (p + 1) * S (a + x) * theta (a + x)) =
@@ -29,13 +35,14 @@ theorem powerWeightedShift_score_moment_identity
     simpa only [u, u', hexp] using hrpow
   have hv : ∀ x ∈ Set.Ioi (0 : ℝ), HasDerivAt v (v' x) x := by
     intro x hx
-    have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
-    simpa [v, v'] using (htheta_deriv (a + x) hax0).comp_const_add a x
+    have haxpos : 0 < a + x := by linarith [ha, hx]
+    simpa [v, v'] using
+      (hasDerivAt_shift_of_pos_of_hasDerivWithinAt_Ici haxpos htheta_deriv)
   have hscore :
       IntegrableOn
         (fun x : ℝ => x ^ (p + 1) * S (a + x) * theta (a + x))
         (Set.Ioi (0 : ℝ)) :=
-    powerWeightedShift_score_integrableOn_Ioi
+    powerWeightedShift_score_integrableOn_Ioi_within
       ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
   have huv' : IntegrableOn (u * v') (Set.Ioi (0 : ℝ)) := by
     rw [Pi.mul_def]
@@ -45,7 +52,7 @@ theorem powerWeightedShift_score_moment_identity
     ring
   have hbase :
       IntegrableOn (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi (0 : ℝ)) :=
-    powerWeightedShift_integrableOn_Ioi
+    powerWeightedShift_integrableOn_Ioi_within
       ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
   have hscaled :
       IntegrableOn (fun x : ℝ => (p + 1) * (x ^ p * theta (a + x)))
@@ -57,12 +64,12 @@ theorem powerWeightedShift_score_moment_identity
     intro x hx
     dsimp [u', v]
     ring
-  have hzero0 := powerWeightedShift_boundary_zero
+  have hzero0 := powerWeightedShift_boundary_zero_within
     (theta := theta) (S := S) (a := a) (p := p) ha hp htheta_deriv
   have hzero : Tendsto (u * v) (𝓝[>] (0 : ℝ)) (𝓝 0) := by
     rw [Pi.mul_def]
     simpa [u, v] using hzero0
-  have hinfty0 := powerWeightedShift_boundary_atTop
+  have hinfty0 := powerWeightedShift_boundary_atTop_within
     (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := p)
     ha htheta_pos htheta_deriv htheta_int hS hSprime_pos
   have hinfty : Tendsto (u * v) atTop (𝓝 0) := by
@@ -99,5 +106,26 @@ theorem powerWeightedShift_score_moment_identity
         rw [integral_const_mul]
   rw [hleft, hright] at hibp
   linarith
+
+/-- Backward-compatible wrapper for the former two-sided differentiability
+assumptions.  The publication theorem should use
+`powerWeightedShift_score_moment_identity_within`. -/
+theorem powerWeightedShift_score_moment_identity
+    {theta S Sprime : ℝ → ℝ} {a p : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    (∫ x : ℝ in Set.Ioi 0,
+        x ^ (p + 1) * S (a + x) * theta (a + x)) =
+      (p + 1) * ∫ x : ℝ in Set.Ioi 0, x ^ p * theta (a + x) := by
+  exact powerWeightedShift_score_moment_identity_within
+    ha hp htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos
 
 end ScoreCurvatureStarOrder
