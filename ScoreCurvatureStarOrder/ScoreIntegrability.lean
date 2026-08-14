@@ -27,8 +27,13 @@ theorem powerWeightedShift_product_deriv
     ((fun y : ℝ => y ^ (p + 1)) * (fun y : ℝ => theta (a + y)))
     ((p + 1) * x ^ p * theta (a + x) -
       x ^ (p + 1) * S (a + x) * theta (a + x)) x
-  have hprod := hrpow.mul htheta_shift
-  convert hprod using 1
-  ring
+  have hscalar :
+      ((p + 1) * x ^ p) * theta (a + x) +
+          x ^ (p + 1) * (-S (a + x) * theta (a + x)) =
+        (p + 1) * x ^ p * theta (a + x) -
+          x ^ (p + 1) * S (a + x) * theta (a + x) := by
+    ring
+  rw [← hscalar]
+  exact hrpow.mul htheta_shift
 
 end ScoreCurvatureStarOrder
