@@ -95,4 +95,81 @@ theorem powerWeightedShift_product_deriv_nonpos_tail
   rw [hfactor]
   exact mul_nonpos_of_nonneg_of_nonpos hfac hdiff
 
+/-- The score-weighted moment integrand is integrable on the positive half-line.
+This is the absolute-integrability input needed for the improper integration-by-parts identity. -/
+theorem powerWeightedShift_score_integrableOn_Ioi
+    {theta S Sprime : ℝ → ℝ} {a p : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    IntegrableOn
+      (fun x : ℝ => x ^ (p + 1) * S (a + x) * theta (a + x))
+      (Set.Ioi (0 : ℝ)) := by
+  rcases powerWeightedShift_product_deriv_nonpos_tail
+      ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos with
+    ⟨T, hTpos, htail⟩
+  rw [← Ioc_union_Ioi_eq_Ioi hTpos.le, integrableOn_union]
+  constructor
+  · rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le hTpos.le]
+    have hp1nonneg : 0 ≤ p + 1 := by
+      linarith
+    have hrpow_cont : ContinuousOn (fun x : ℝ => x ^ (p + 1)) [[0, T]] :=
+      continuousOn_id.rpow_const (by
+        intro x hx
+        exact Or.inr hp1nonneg)
+    have hS_shift_cont : ContinuousOn (fun x : ℝ => S (a + x)) [[0, T]] := by
+      intro x hx
+      rw [uIcc_of_le hTpos.le] at hx
+      have hax0 : 0 ≤ a + x := by
+        linarith [ha, hx.1]
+      have hshift : ContinuousAt (fun y : ℝ => a + y) x := by
+        fun_prop
+      exact ((hS (a + x) hax0).continuousAt.comp hshift).continuousWithinAt
+    have htheta_shift_cont : ContinuousOn (fun x : ℝ => theta (a + x)) [[0, T]] := by
+      intro x hx
+      rw [uIcc_of_le hTpos.le] at hx
+      have hax0 : 0 ≤ a + x := by
+        linarith [ha, hx.1]
+      have hshift : ContinuousAt (fun y : ℝ => a + y) x := by
+        fun_prop
+      exact ((htheta_deriv (a + x) hax0).continuousAt.comp hshift).continuousWithinAt
+    exact ((hrpow_cont.mul hS_shift_cont).mul htheta_shift_cont).intervalIntegrable
+  · let g : ℝ → ℝ := fun x => x ^ (p + 1) * theta (a + x)
+    let d : ℝ → ℝ := fun x =>
+      (p + 1) * x ^ p * theta (a + x) -
+        x ^ (p + 1) * S (a + x) * theta (a + x)
+    have hderiv : ∀ x ∈ Set.Ici T, HasDerivAt g (d x) x := by
+      intro x hx
+      simpa [g, d] using (htail x hx).1
+    have hneg : ∀ x ∈ Set.Ioi T, d x ≤ 0 := by
+      intro x hx
+      simpa [d] using (htail x hx.le).2
+    have hg : Tendsto g atTop (𝓝 0) := by
+      dsimp [g]
+      exact powerWeightedShift_boundary_atTop
+        ha htheta_pos htheta_deriv htheta_int hS hSprime_pos
+    have hdint : IntegrableOn d (Set.Ioi T) :=
+      integrableOn_Ioi_deriv_of_nonpos' hderiv hneg hg
+    have hbase0 :
+        IntegrableOn (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi (0 : ℝ)) :=
+      powerWeightedShift_integrableOn_Ioi
+        ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
+    have hbaseT :
+        IntegrableOn (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi T) :=
+      hbase0.mono_set (fun x hx => lt_of_le_of_lt hTpos.le hx)
+    have hscaled :
+        IntegrableOn (fun x : ℝ => (p + 1) * (x ^ p * theta (a + x))) (Set.Ioi T) :=
+      hbaseT.const_mul (p + 1)
+    have hscore :
+        IntegrableOn (fun x : ℝ => (p + 1) * (x ^ p * theta (a + x)) - d x)
+          (Set.Ioi T) :=
+      hscaled.sub hdint
+    refine IntegrableOn.congr_fun hscore ?_ measurableSet_Ioi
+    intro x hx
+    dsimp [d]
+    ring
+
 end ScoreCurvatureStarOrder
