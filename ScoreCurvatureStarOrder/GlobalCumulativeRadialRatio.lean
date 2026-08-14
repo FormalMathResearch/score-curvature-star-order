@@ -55,7 +55,13 @@ theorem powerWeightedShift_cumulativeRadialRatio_antitoneOn_Ioi_within
   have hx0z0 : x0 = z0 := huniq x0 ⟨hx0, hroot⟩
   have hy0z0 : y0 = z0 := huniq y0 ⟨hy0, hyroot⟩
   have hy0x0 : y0 = x0 := hy0z0.trans hx0z0.symm
-  subst y0
+  have hRderiv_right : ∀ x : ℝ, x0 < x →
+      deriv (fun y : ℝ =>
+        powerWeightedShiftCumulativeRadialRatio theta S a p y) x ≤ 0 := by
+    intro x hx0x
+    apply hRderiv_right_y0 x
+    rw [hy0x0]
+    exact hx0x
 
   let R : ℝ → ℝ := fun x =>
     powerWeightedShiftCumulativeRadialRatio theta S a p x
@@ -98,7 +104,7 @@ theorem powerWeightedShift_cumulativeRadialRatio_antitoneOn_Ioi_within
     intro x hxInt
     rw [interior_Ici] at hxInt
     change x0 < x at hxInt
-    simpa [R] using hRderiv_right_y0 x hxInt
+    simpa [R] using hRderiv_right x hxInt
   have hRanti_right : AntitoneOn R (Set.Ici x0) := by
     exact antitoneOn_of_deriv_nonpos
       (convex_Ici x0) hRcont_right hRdiff_right hRderiv_right_closed
@@ -111,15 +117,25 @@ theorem powerWeightedShift_cumulativeRadialRatio_antitoneOn_Ioi_within
         ⟨hx, hx_left⟩ ⟨hy, hy_left⟩ hxy
     · have hx0y : x0 < y := lt_of_not_ge hy_left
       by_cases hx_right : x0 ≤ x
-      · exact hRanti_right
-          hx_right hx0y.le hxy
+      · have hxmem : x ∈ Set.Ici x0 := by
+          change x0 ≤ x
+          exact hx_right
+        have hymem : y ∈ Set.Ici x0 := by
+          change x0 ≤ y
+          exact hx0y.le
+        exact hRanti_right hxmem hymem hxy
       · have hxx0 : x < x0 := lt_of_not_ge hx_right
         have hleft_bridge : R x0 ≤ R x :=
           hRanti_left
             ⟨hx, hxx0.le⟩ ⟨hx0, le_rfl⟩ hxx0.le
+        have hx0mem : x0 ∈ Set.Ici x0 := by
+          change x0 ≤ x0
+          exact le_rfl
+        have hymem : y ∈ Set.Ici x0 := by
+          change x0 ≤ y
+          exact hx0y.le
         have hright_bridge : R y ≤ R x0 :=
-          hRanti_right
-            le_rfl hx0y.le hx0y.le
+          hRanti_right hx0mem hymem hx0y.le
         exact hright_bridge.trans hleft_bridge
 
   simpa [R] using hRanti_global
