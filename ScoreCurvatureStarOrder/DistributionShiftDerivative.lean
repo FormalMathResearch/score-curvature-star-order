@@ -278,7 +278,6 @@ theorem powerWeightedShiftCDF_hasDerivAt
           rfl
       _ = (N' + G * N) / M := by
           rw [div_eq_mul_inv]
-          ring
 
   have hquot := hNderiv.fun_div hMderiv hMne
   have hcoef :
@@ -286,6 +285,7 @@ theorem powerWeightedShiftCDF_hasDerivAt
         powerWeightedShiftCumulativeShiftNumerator theta S a p x := by
     rw [hD, hAeq]
     field_simp [hMne]
+    ring
 
   change HasDerivAt
     (fun b : ℝ =>
