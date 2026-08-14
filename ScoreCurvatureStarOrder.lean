@@ -26,3 +26,4 @@ import ScoreCurvatureStarOrder.SlopeQuotient
 import ScoreCurvatureStarOrder.ScoreMeanIntegrability
 import ScoreCurvatureStarOrder.KernelExpectation
 import ScoreCurvatureStarOrder.SlopeQuotientMonotonicity
+import ScoreCurvatureStarOrder.TurningPoint
