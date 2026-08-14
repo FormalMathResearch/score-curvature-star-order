@@ -54,10 +54,10 @@ theorem powerWeightedShiftCumulativeShiftNumerator_hasDerivAt_within
     continuousOn_shift_Ici_of_hasDerivWithinAt ha hS
   have htheta_shift_cont :
       ContinuousOn (fun t : ℝ => theta (a + t)) (Set.Ioi (0 : ℝ)) :=
-    htheta_shift_Ici.mono (fun _ ht => ht.le)
+    htheta_shift_Ici.mono (fun t ht => show 0 ≤ t from ht.le)
   have hS_shift_cont :
       ContinuousOn (fun t : ℝ => S (a + t)) (Set.Ioi (0 : ℝ)) :=
-    hS_shift_Ici.mono (fun _ ht => ht.le)
+    hS_shift_Ici.mono (fun t ht => show 0 ≤ t from ht.le)
   have hdensity_cont :
       ContinuousOn (fun t : ℝ => powerWeightedShiftDensity theta a p t) (Set.Ioi (0 : ℝ)) := by
     have hraw :
