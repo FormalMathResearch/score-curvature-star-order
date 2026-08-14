@@ -35,7 +35,8 @@ theorem powerWeightedShift_score_moment_identity_within
     simpa only [u, u', hexp] using hrpow
   have hv : ∀ x ∈ Set.Ioi (0 : ℝ), HasDerivAt v (v' x) x := by
     intro x hx
-    have haxpos : 0 < a + x := by linarith [ha, hx]
+    have hxpos : 0 < x := hx
+    have haxpos : 0 < a + x := add_pos_of_nonneg_of_pos ha hxpos
     simpa [v, v'] using
       (hasDerivAt_shift_of_pos_of_hasDerivWithinAt_Ici haxpos htheta_deriv)
   have hscore :
