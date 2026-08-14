@@ -19,3 +19,4 @@ import ScoreCurvatureStarOrder.DensityShiftDerivative
 import ScoreCurvatureStarOrder.RadialDensity
 import ScoreCurvatureStarOrder.CumulativeShiftNumerator
 import ScoreCurvatureStarOrder.DistributionShiftDerivative
+import ScoreCurvatureStarOrder.SlopeQuotient
