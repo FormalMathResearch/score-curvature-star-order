@@ -80,6 +80,7 @@ theorem powerWeightedShift_turningPoint_exists_unique_within
     · exact hp1_lt_prodX.le
   have himage := intermediate_value_Icc hXpos.le hcontIcc htarget
   rcases himage with ⟨x0, hx0Icc, hx0eq⟩
+  change x0 * S (a + x0) = p + 1 at hx0eq
   have hx0pos : 0 < x0 := by
     by_contra hnot
     have hx0le : x0 ≤ 0 := le_of_not_gt hnot
