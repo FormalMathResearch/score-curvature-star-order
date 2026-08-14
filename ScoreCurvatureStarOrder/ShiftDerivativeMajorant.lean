@@ -74,7 +74,7 @@ theorem powerWeightedUnshifted_score_integrableOn_Ioi
         have hnegInt := hderivInt.neg
         refine IntegrableOn.congr_fun hnegInt ?_ measurableSet_Ioi
         intro x hx
-        ring
+        simp
       have hrpow_cont : ContinuousOn (fun x : ℝ => x ^ p) (Set.Ioi B) :=
         continuousOn_id.rpow_const (by
           intro x hx
