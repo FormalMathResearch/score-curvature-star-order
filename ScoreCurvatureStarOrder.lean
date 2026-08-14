@@ -31,3 +31,4 @@ import ScoreCurvatureStarOrder.TurningPoint
 import ScoreCurvatureStarOrder.TurningPointConsequences
 import ScoreCurvatureStarOrder.LeftCumulativeRadialRatio
 import ScoreCurvatureStarOrder.RightEndpointLimits
+import ScoreCurvatureStarOrder.RightCumulativeRadialRatio
