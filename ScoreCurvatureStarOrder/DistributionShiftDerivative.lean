@@ -215,7 +215,7 @@ theorem powerWeightedShiftCDF_hasDerivAt
       D / M = deriv (fun b : ℝ => Real.log (powerWeightedShiftMoment theta b p)) a := by
         simpa [M] using hrawlog.deriv.symm
       _ = -G := by
-        simpa [G] using hmeanlog.deriv
+        simpa [G, powerWeightedShiftScoreMean] using hmeanlog.deriv
   have hD : D = (-G) * M := (div_eq_iff hMne).mp hDdiv
 
   have hbaseIoi :
@@ -286,7 +286,6 @@ theorem powerWeightedShiftCDF_hasDerivAt
         powerWeightedShiftCumulativeShiftNumerator theta S a p x := by
     rw [hD, hAeq]
     field_simp [hMne]
-    ring
 
   change HasDerivAt
     (fun b : ℝ =>
