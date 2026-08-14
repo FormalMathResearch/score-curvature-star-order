@@ -8,3 +8,4 @@ import ScoreCurvatureStarOrder.Moments
 import ScoreCurvatureStarOrder.Boundary
 import ScoreCurvatureStarOrder.ScoreIntegrability
 import ScoreCurvatureStarOrder.IntegrationByParts
+import ScoreCurvatureStarOrder.Density
