@@ -31,8 +31,9 @@ theorem powerWeightedShift_boundary_zero_within
         ContinuousWithinAt (fun x : ℝ => theta (a + x)) (Set.Ioi (0 : ℝ)) 0 := by
       apply (htheta_shift 0 (by simp)).mono
       intro x hx
+      change 0 < x at hx
       exact hx.le
-    simpa using hcont
+    simpa only [ContinuousWithinAt, add_zero] using hcont
   simpa using hxpow.mul htheta
 
 /-- Backward-compatible wrapper for the former two-sided boundary assumption. -/
