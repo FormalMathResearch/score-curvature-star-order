@@ -20,3 +20,4 @@ import ScoreCurvatureStarOrder.RadialDensity
 import ScoreCurvatureStarOrder.CumulativeShiftNumerator
 import ScoreCurvatureStarOrder.DistributionShiftDerivative
 import ScoreCurvatureStarOrder.SlopeQuotient
+import ScoreCurvatureStarOrder.ScoreMeanIntegrability
