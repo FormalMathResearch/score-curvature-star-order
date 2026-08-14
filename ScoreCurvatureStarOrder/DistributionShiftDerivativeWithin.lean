@@ -124,7 +124,10 @@ theorem powerWeightedShiftMoment_hasDerivAt_within
     have hthetashift :
         ContinuousOn (fun x : ℝ => theta (a + x)) (Set.Ici (0 : ℝ)) :=
       continuousOn_shift_Ici_of_hasDerivWithinAt ha.le htheta_deriv
-    have hIoi_sub : Set.Ioi (0 : ℝ) ⊆ Set.Ici (0 : ℝ) := fun _ hx => hx.le
+    have hIoi_sub : Set.Ioi (0 : ℝ) ⊆ Set.Ici (0 : ℝ) := by
+      intro x hx
+      change 0 ≤ x
+      exact hx.le
     have hscore_cont :
         ContinuousOn (fun x : ℝ => -S (a + x) * theta (a + x)) (Set.Ioi (0 : ℝ)) :=
       ((hSshift.mono hIoi_sub).neg).mul (hthetashift.mono hIoi_sub)
