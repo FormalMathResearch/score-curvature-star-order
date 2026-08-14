@@ -10,3 +10,4 @@ import ScoreCurvatureStarOrder.ScoreIntegrability
 import ScoreCurvatureStarOrder.IntegrationByParts
 import ScoreCurvatureStarOrder.Density
 import ScoreCurvatureStarOrder.Expectation
+import ScoreCurvatureStarOrder.DerivativeTail
