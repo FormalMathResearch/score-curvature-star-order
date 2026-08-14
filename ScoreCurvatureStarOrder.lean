@@ -3,7 +3,9 @@ import ScoreCurvatureStarOrder.HalfLineRegularity
 import ScoreCurvatureStarOrder.Entropy
 import ScoreCurvatureStarOrder.TwoPointKernel
 import ScoreCurvatureStarOrder.ScoreRatio
+import ScoreCurvatureStarOrder.ScoreRatioWithin
 import ScoreCurvatureStarOrder.GlobalKernel
+import ScoreCurvatureStarOrder.GlobalKernelWithin
 import ScoreCurvatureStarOrder.Tail
 import ScoreCurvatureStarOrder.Moments
 import ScoreCurvatureStarOrder.Boundary
@@ -22,3 +24,4 @@ import ScoreCurvatureStarOrder.CumulativeShiftNumerator
 import ScoreCurvatureStarOrder.DistributionShiftDerivative
 import ScoreCurvatureStarOrder.SlopeQuotient
 import ScoreCurvatureStarOrder.ScoreMeanIntegrability
+import ScoreCurvatureStarOrder.KernelExpectation
