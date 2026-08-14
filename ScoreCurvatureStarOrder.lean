@@ -29,3 +29,4 @@ import ScoreCurvatureStarOrder.KernelExpectation
 import ScoreCurvatureStarOrder.SlopeQuotientMonotonicity
 import ScoreCurvatureStarOrder.TurningPoint
 import ScoreCurvatureStarOrder.TurningPointConsequences
+import ScoreCurvatureStarOrder.LeftCumulativeRadialRatio
