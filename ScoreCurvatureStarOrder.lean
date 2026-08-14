@@ -25,3 +25,4 @@ import ScoreCurvatureStarOrder.DistributionShiftDerivative
 import ScoreCurvatureStarOrder.SlopeQuotient
 import ScoreCurvatureStarOrder.ScoreMeanIntegrability
 import ScoreCurvatureStarOrder.KernelExpectation
+import ScoreCurvatureStarOrder.SlopeQuotientMonotonicity
