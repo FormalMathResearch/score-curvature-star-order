@@ -54,7 +54,7 @@ theorem exists_score_pos_of_integrable
 /-- Under positive score derivative, the score is eventually bounded below by a
 strictly positive constant. Score differentiability is only assumed within the
 closed positive half-line. -/
-theorem exists_positive_score_tail
+theorem exists_positive_score_tail_within
     {theta S Sprime : ℝ → ℝ}
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
     (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
@@ -81,6 +81,23 @@ theorem exists_positive_score_tail
   intro x hRx
   have hx0 : x ∈ Set.Ici (0 : ℝ) := hR.trans hRx
   exact hmonoS hR hx0 hRx
+
+/-- Compatibility wrapper for the pre-refactor two-sided derivative interface.
+Downstream theorems are migrated away from this wrapper incrementally. -/
+theorem exists_positive_score_tail
+    {theta S Sprime : ℝ → ℝ}
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    ∃ R c : ℝ, 0 ≤ R ∧ 0 < c ∧ ∀ x, R ≤ x → c ≤ S x := by
+  exact exists_positive_score_tail_within
+    htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos
 
 /-- Once `S ≥ c > 0` on a tail, the relation `θ' = -S θ` gives the
 exponential tail bound directly via monotonicity of `x ↦ exp(c x) θ(x)`.
@@ -168,7 +185,7 @@ theorem automatic_positive_score_and_exponential_tail_within
     ∃ R c : ℝ, 0 ≤ R ∧ 0 < c ∧
       (∀ x, R ≤ x → c ≤ S x) ∧
       (∀ x, R ≤ x → theta x ≤ theta R * Real.exp (-c * (x - R))) := by
-  rcases exists_positive_score_tail
+  rcases exists_positive_score_tail_within
       htheta_pos htheta_deriv htheta_int hS hSprime_pos with
     ⟨R, c, hR, hc, hS_lower⟩
   refine ⟨R, c, hR, hc, hS_lower, ?_⟩
