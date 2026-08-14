@@ -52,6 +52,15 @@ theorem powerWeightedShift_twoPointKernel_integrableOn_Ioi_within
   have hlin := ((h1.sub h2).sub h3).add h4
   refine IntegrableOn.congr_fun hlin ?_ measurableSet_Ioi
   intro t ht
+  change
+    Sprime (a + x) *
+          ((t * S (a + t)) * powerWeightedShiftDensity theta a p t) -
+        (Sprime (a + x) * x) *
+          (S (a + t) * powerWeightedShiftDensity theta a p t) -
+        S (a + x) *
+          (S (a + t) * powerWeightedShiftDensity theta a p t) +
+        S (a + x) ^ 2 * powerWeightedShiftDensity theta a p t =
+      twoPointKernel S Sprime a x t * powerWeightedShiftDensity theta a p t
   unfold twoPointKernel
   ring
 
@@ -99,31 +108,49 @@ theorem powerWeightedShiftSlopeKernel_eq_integral_twoPointKernel_within
   have h4 := hf.const_mul (S (a + x) ^ 2)
   have h12 := h1.sub h2
   have h123 := h12.sub h3
-  have hlin := h123.add h4
   have hXS_id := powerWeightedShift_score_expectation_identity_within
     (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := p)
     ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
   have hf_id := powerWeightedShiftDensity_integral_eq_one_within
     (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := p)
     ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
+  let F1 : ℝ → ℝ := fun t =>
+    Sprime (a + x) *
+      ((t * S (a + t)) * powerWeightedShiftDensity theta a p t)
+  let F2 : ℝ → ℝ := fun t =>
+    (Sprime (a + x) * x) *
+      (S (a + t) * powerWeightedShiftDensity theta a p t)
+  let F3 : ℝ → ℝ := fun t =>
+    S (a + x) *
+      (S (a + t) * powerWeightedShiftDensity theta a p t)
+  let F4 : ℝ → ℝ := fun t =>
+    S (a + x) ^ 2 * powerWeightedShiftDensity theta a p t
+  have h1F : IntegrableOn F1 (Set.Ioi (0 : ℝ)) := by simpa [F1] using h1
+  have h2F : IntegrableOn F2 (Set.Ioi (0 : ℝ)) := by simpa [F2] using h2
+  have h3F : IntegrableOn F3 (Set.Ioi (0 : ℝ)) := by simpa [F3] using h3
+  have h4F : IntegrableOn F4 (Set.Ioi (0 : ℝ)) := by simpa [F4] using h4
+  have h12F := h1F.sub h2F
+  have h123F := h12F.sub h3F
   have hkernel :
       (∫ t : ℝ in Set.Ioi 0,
           twoPointKernel S Sprime a x t * powerWeightedShiftDensity theta a p t) =
-        ∫ t : ℝ in Set.Ioi 0,
-          (Sprime (a + x) *
+        ∫ t : ℝ in Set.Ioi 0, ((F1 - F2 - F3 + F4) t) := by
+    refine setIntegral_congr_fun measurableSet_Ioi ?_
+    intro t ht
+    change
+      twoPointKernel S Sprime a x t * powerWeightedShiftDensity theta a p t =
+        Sprime (a + x) *
               ((t * S (a + t)) * powerWeightedShiftDensity theta a p t) -
             (Sprime (a + x) * x) *
               (S (a + t) * powerWeightedShiftDensity theta a p t) -
             S (a + x) *
               (S (a + t) * powerWeightedShiftDensity theta a p t) +
-            S (a + x) ^ 2 * powerWeightedShiftDensity theta a p t) := by
-    refine setIntegral_congr_fun measurableSet_Ioi ?_
-    intro t ht
+            S (a + x) ^ 2 * powerWeightedShiftDensity theta a p t
     unfold twoPointKernel
     ring
   rw [hkernel]
-  rw [integral_add h123 h4, integral_sub h12 h3, integral_sub h1 h2]
-  simp only [integral_const_mul]
+  rw [integral_add h123F h4F, integral_sub h12F h3F, integral_sub h1F h2F]
+  simp only [F1, F2, F3, F4, integral_const_mul]
   rw [hXS_id, hf_id]
   change powerWeightedShiftSlopeKernel theta S Sprime a p x =
     Sprime (a + x) * (p + 1) -
