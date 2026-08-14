@@ -84,10 +84,27 @@ theorem powerWeightedShiftCDF_hasDerivAt_x_within
     change ContinuousAt (fun t : ℝ => t ^ p * theta (a + t)) x
     exact hpow_cont.mul htheta_shift_at.continuousAt
 
+  have hpow_cont_Ioi : ContinuousOn (fun t : ℝ => t ^ p) (Set.Ioi (0 : ℝ)) :=
+    continuousOn_id.rpow_const (by
+      intro t ht
+      left
+      exact ht.ne')
+  have hIoi_sub : Set.Ioi (0 : ℝ) ⊆ Set.Ici (0 : ℝ) := by
+    intro t ht
+    change 0 ≤ t
+    exact ht.le
+  have hg_cont_Ioi : ContinuousOn g (Set.Ioi (0 : ℝ)) := by
+    change ContinuousOn (fun t : ℝ => t ^ p * theta (a + t)) (Set.Ioi (0 : ℝ))
+    exact hpow_cont_Ioi.mul (htheta_shift_Ici.mono hIoi_sub)
+  have hg_meas_restrict :
+      AEStronglyMeasurable g (volume.restrict (Set.Ioi (0 : ℝ))) :=
+    hg_cont_Ioi.aestronglyMeasurable measurableSet_Ioi
+  have hg_meas : StronglyMeasurableAtFilter g (𝓝 x) :=
+    hg_meas_restrict.stronglyMeasurableAtFilter_of_mem (Ioi_mem_nhds hx)
+
   have hnum :
       HasDerivAt (fun y : ℝ => ∫ t : ℝ in 0..y, g t) (g x) x :=
-    intervalIntegral.integral_hasDerivAt_right
-      hg_interval hg_cont.stronglyMeasurableAt hg_cont
+    intervalIntegral.integral_hasDerivAt_right hg_interval hg_meas hg_cont
   have hscaled :
       HasDerivAt
         (fun y : ℝ => M⁻¹ * (∫ t : ℝ in 0..y, g t))
