@@ -55,19 +55,23 @@ theorem powerWeightedShiftCumulativeShiftNumerator_hasDerivAt
     exact ((hS (a + t) hat0).continuousAt.comp hshift).continuousWithinAt
   have hdensity_cont :
       ContinuousOn (fun t : ℝ => powerWeightedShiftDensity theta a p t) (Set.Ioi (0 : ℝ)) := by
-    have hraw := (hrpow_cont.mul htheta_shift_cont).mul
-      (continuousOn_const : ContinuousOn (fun _ : ℝ => M⁻¹) (Set.Ioi (0 : ℝ)))
-    simpa [powerWeightedShiftDensity, M, div_eq_mul_inv, mul_assoc] using hraw
+    have hraw :
+        ContinuousOn
+          (fun t : ℝ => (t ^ p * theta (a + t)) * M⁻¹) (Set.Ioi (0 : ℝ)) :=
+      (hrpow_cont.mul htheta_shift_cont).mul
+        (continuousOn_const : ContinuousOn (fun _ : ℝ => M⁻¹) (Set.Ioi (0 : ℝ)))
+    simpa [powerWeightedShiftDensity, M, div_eq_mul_inv] using hraw
   have hcont : ContinuousOn h (Set.Ioi (0 : ℝ)) := by
     dsimp [h]
     exact hdensity_cont.mul
       ((continuousOn_const : ContinuousOn (fun _ : ℝ => G) (Set.Ioi (0 : ℝ))).sub
         hS_shift_cont)
+  have hIoi_nhds : Set.Ioi (0 : ℝ) ∈ 𝓝 x := isOpen_Ioi.mem_nhds hx
   have hcontAt : ContinuousAt h x :=
-    hcont.continuousAt (Set.Ioi_mem_nhds hx)
+    hcont.continuousAt hIoi_nhds
   have hmeas : StronglyMeasurableAtFilter h (𝓝 x) :=
-    (hcont.aestronglyMeasurable measurableSet_Ioi).stronglyMeasurableAtFilter_of_mem
-      (Set.Ioi_mem_nhds hx)
+    AEStronglyMeasurable.stronglyMeasurableAtFilter_of_mem
+      (hcont.aestronglyMeasurable measurableSet_Ioi) hIoi_nhds
 
   have htheta_shift_uIcc :
       ContinuousOn (fun t : ℝ => theta (a + t)) [[0, x]] := by
