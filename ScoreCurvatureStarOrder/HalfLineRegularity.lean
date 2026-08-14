@@ -5,7 +5,7 @@ namespace ScoreCurvatureStarOrder
 open Set Filter
 
 /-- A derivative known only within the closed positive half-line is an ordinary
-(two-sided) derivative at every strictly positive interior point.  At the
+(two-sided) derivative at every strictly positive interior point. At the
 boundary point `0` we intentionally keep the weaker `HasDerivWithinAt`
 statement, matching one-sided regularity on `[0, ∞)`. -/
 theorem hasDerivAt_of_pos_of_hasDerivWithinAt_Ici
@@ -13,7 +13,7 @@ theorem hasDerivAt_of_pos_of_hasDerivWithinAt_Ici
     (hx : 0 < x)
     (h : HasDerivWithinAt f f' (Set.Ici (0 : ℝ)) x) :
     HasDerivAt f f' x := by
-  exact h.hasDerivAt (Set.Ici_mem_nhds hx)
+  exact h.hasDerivAt (Ici_mem_nhds hx)
 
 /-- Pointwise differentiability within `[0, ∞)` implies continuity on that
 closed half-line, including the one-sided boundary continuity at `0`. -/
