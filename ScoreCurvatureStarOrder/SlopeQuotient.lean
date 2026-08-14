@@ -93,7 +93,7 @@ theorem powerWeightedShiftSlopeQuotient_hasDerivAt
   have hprod :
       HasDerivAt (fun y : ℝ => y * S (a + y)) (sx + x * spx) x := by
     rw [← hprod_fun]
-    simpa only [sx] using hprod0
+    simpa only [sx, one_mul, id_eq] using hprod0
   have hden0 := (hasDerivAt_const x (p + 1)).sub hprod
   have hden_fun :
       ((fun _ : ℝ => p + 1) - (fun y : ℝ => y * S (a + y))) =
