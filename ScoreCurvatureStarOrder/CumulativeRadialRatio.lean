@@ -78,12 +78,12 @@ theorem powerWeightedShiftCumulativeRadialRatio_hasDerivAt_within
     (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
     HasDerivAt
       (fun y : ℝ => powerWeightedShiftCumulativeRadialRatio theta S a p y)
-      ((powerWeightedShiftDensity theta a p x *
-          (powerWeightedShiftScoreMean theta S a p - S (a + x))) *
-          powerWeightedShiftRadialDensity theta a p x -
-        powerWeightedShiftCumulativeShiftNumerator theta S a p x *
+      ((((powerWeightedShiftDensity theta a p x *
+            (powerWeightedShiftScoreMean theta S a p - S (a + x))) *
+          powerWeightedShiftRadialDensity theta a p x) -
+        (powerWeightedShiftCumulativeShiftNumerator theta S a p x *
           (powerWeightedShiftDensity theta a p x *
-            (p + 1 - x * S (a + x)))) /
+            (p + 1 - x * S (a + x))))) /
         (powerWeightedShiftRadialDensity theta a p x) ^ 2) x := by
   have hA := powerWeightedShiftCumulativeShiftNumerator_hasDerivAt_within
     (theta := theta) (S := S) (Sprime := Sprime)
