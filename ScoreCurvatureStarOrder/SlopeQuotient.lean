@@ -75,14 +75,35 @@ theorem powerWeightedShiftSlopeQuotient_hasDerivAt
     hSxa.comp_add_const x a
   have hSshift : HasDerivAt (fun y : ℝ => S (a + y)) spx x := by
     simpa only [add_comm] using hSshift0
+  have hnum0 := (hasDerivAt_const x G).sub hSshift
+  have hnum_fun :
+      ((fun _ : ℝ => G) - (fun y : ℝ => S (a + y))) =
+        (fun y : ℝ => G - S (a + y)) := by
+    funext y
+    rfl
   have hnum : HasDerivAt (fun y : ℝ => G - S (a + y)) (-spx) x := by
-    simpa only [Pi.sub_apply] using (hasDerivAt_const x G).sub hSshift
+    rw [← hnum_fun]
+    simpa only [zero_sub] using hnum0
+  have hprod0 := (hasDerivAt_id x).mul hSshift
+  have hprod_fun :
+      (id * (fun y : ℝ => S (a + y))) =
+        (fun y : ℝ => y * S (a + y)) := by
+    funext y
+    rfl
   have hprod :
       HasDerivAt (fun y : ℝ => y * S (a + y)) (sx + x * spx) x := by
-    simpa only [Pi.mul_apply, id_eq, one_mul, sx] using (hasDerivAt_id x).mul hSshift
+    rw [← hprod_fun]
+    simpa only [sx] using hprod0
+  have hden0 := (hasDerivAt_const x (p + 1)).sub hprod
+  have hden_fun :
+      ((fun _ : ℝ => p + 1) - (fun y : ℝ => y * S (a + y))) =
+        (fun y : ℝ => p + 1 - y * S (a + y)) := by
+    funext y
+    rfl
   have hdenDer :
       HasDerivAt (fun y : ℝ => p + 1 - y * S (a + y)) (-(sx + x * spx)) x := by
-    simpa only [Pi.sub_apply, zero_sub] using (hasDerivAt_const x (p + 1)).sub hprod
+    rw [← hden_fun]
+    simpa only [zero_sub] using hden0
   have hquot := hnum.fun_div hdenDer hden
   have hcoef :
       ((-spx) * (p + 1 - x * sx) -
