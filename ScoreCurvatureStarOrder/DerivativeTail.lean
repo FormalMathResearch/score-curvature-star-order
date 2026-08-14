@@ -135,7 +135,9 @@ theorem exists_scoreDeriv_lt_sq_on_tail
     monotoneOn_of_deriv_nonneg (convex_Ici R) hcont hdiff hderiv_nonneg
   refine ⟨T, hTR, ?_⟩
   intro z hzT
-  have hzR : z ∈ Set.Ici R := hTR.trans hzT
+  have hzR : z ∈ Set.Ici R := by
+    change R ≤ z
+    exact hTR.trans hzT
   have hratio_z : Sprime z / S z ≤ Sprime T / S T :=
     hratio hTR hzR hzT
   have hSTz : S T ≤ S z := hSmono hTR hzR hzT
@@ -168,9 +170,19 @@ theorem exists_score_mul_theta_antitoneOn_tail
         HasDerivAt (fun y => S y * theta y)
           (theta z * (Sprime z - S z ^ 2)) z := by
     intro z hzT
-    have hz0 : z ∈ Set.Ici (0 : ℝ) := hT0.trans hzT
-    have hraw := (hS z hz0).mul (htheta_deriv z hz0)
-    convert hraw using 1 <;> ring
+    have hz0 : z ∈ Set.Ici (0 : ℝ) := by
+      change 0 ≤ z
+      exact hT0.trans hzT
+    have hraw :
+        HasDerivAt (fun y => S y * theta y)
+          (Sprime z * theta z + S z * (-S z * theta z)) z :=
+      (hS z hz0).mul (htheta_deriv z hz0)
+    have hscalar :
+        Sprime z * theta z + S z * (-S z * theta z) =
+          theta z * (Sprime z - S z ^ 2) := by
+      ring
+    rw [hscalar] at hraw
+    exact hraw
   have hcont : ContinuousOn (fun z => S z * theta z) (Set.Ici T) := by
     intro z hz
     exact (hprod z hz).continuousAt.continuousWithinAt
@@ -184,7 +196,9 @@ theorem exists_score_mul_theta_antitoneOn_tail
       ∀ z ∈ interior (Set.Ici T), theta z * (Sprime z - S z ^ 2) ≤ 0 := by
     intro z hz
     have hzT : z ∈ Set.Ici T := interior_subset hz
-    have hz0 : z ∈ Set.Ici (0 : ℝ) := hT0.trans hzT
+    have hz0 : z ∈ Set.Ici (0 : ℝ) := by
+      change 0 ≤ z
+      exact hT0.trans hzT
     have hneg : Sprime z - S z ^ 2 < 0 := sub_neg.mpr (hlt z hzT)
     exact (mul_neg_of_pos_of_neg (htheta_pos z hz0) hneg).le
   refine ⟨T, hTR, ?_⟩
