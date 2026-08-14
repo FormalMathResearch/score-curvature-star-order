@@ -69,16 +69,20 @@ theorem powerWeightedShiftSlopeQuotient_hasDerivAt
   let sx : ℝ := S (a + x)
   let spx : ℝ := Sprime (a + x)
   have hax0 : 0 ≤ a + x := add_nonneg ha hx
+  have hSxa : HasDerivAt S spx (x + a) := by
+    simpa [spx, add_comm] using hS (a + x) hax0
+  have hSshift0 : HasDerivAt (fun y : ℝ => S (y + a)) spx x :=
+    hSxa.comp_add_const x a
   have hSshift : HasDerivAt (fun y : ℝ => S (a + y)) spx x := by
-    simpa [spx, add_comm] using (hS (a + x) hax0).comp_add_const x a
+    simpa only [add_comm] using hSshift0
   have hnum : HasDerivAt (fun y : ℝ => G - S (a + y)) (-spx) x := by
-    simpa using (hasDerivAt_const x G).sub hSshift
+    simpa only [Pi.sub_apply] using (hasDerivAt_const x G).sub hSshift
   have hprod :
       HasDerivAt (fun y : ℝ => y * S (a + y)) (sx + x * spx) x := by
-    simpa [sx] using (hasDerivAt_id x).mul hSshift
+    simpa only [Pi.mul_apply, id_eq, one_mul, sx] using (hasDerivAt_id x).mul hSshift
   have hdenDer :
       HasDerivAt (fun y : ℝ => p + 1 - y * S (a + y)) (-(sx + x * spx)) x := by
-    simpa using (hasDerivAt_const x (p + 1)).sub hprod
+    simpa only [Pi.sub_apply, zero_sub] using (hasDerivAt_const x (p + 1)).sub hprod
   have hquot := hnum.fun_div hdenDer hden
   have hcoef :
       ((-spx) * (p + 1 - x * sx) -
