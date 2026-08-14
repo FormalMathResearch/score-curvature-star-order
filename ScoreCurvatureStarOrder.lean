@@ -13,3 +13,4 @@ import ScoreCurvatureStarOrder.Expectation
 import ScoreCurvatureStarOrder.DerivativeTail
 import ScoreCurvatureStarOrder.ShiftDerivativeMajorant
 import ScoreCurvatureStarOrder.LocalShiftMajorant
+import ScoreCurvatureStarOrder.MomentShiftDerivative
