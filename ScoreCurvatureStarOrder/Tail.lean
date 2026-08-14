@@ -52,7 +52,7 @@ theorem exists_score_pos_of_integrable
   · simpa using hfinite
 
 /-- Under positive score derivative, the score is eventually bounded below by a
-strictly positive constant.  Score differentiability is only assumed within the
+strictly positive constant. Score differentiability is only assumed within the
 closed positive half-line. -/
 theorem exists_positive_score_tail
     {theta S Sprime : ℝ → ℝ}
@@ -152,10 +152,11 @@ theorem theta_le_exp_tail
     _ = theta R * Real.exp (c * R - c * x) := by rw [← Real.exp_sub]
     _ = theta R * Real.exp (-c * (x - R)) := by ring_nf
 
-/-- Lemma 2.2 of the manuscript: integrability and strictly increasing score imply an
-automatic positive score tail and exponential decay of the kernel.
-All differentiability hypotheses are formulated within `[0, ∞)`. -/
-theorem automatic_positive_score_and_exponential_tail
+/-- Lemma 2.2 of the manuscript in its mathematically natural half-line form:
+integrability and strictly increasing score imply an automatic positive score
+tail and exponential decay of the kernel. All differentiability hypotheses are
+formulated within `[0, ∞)`. -/
+theorem automatic_positive_score_and_exponential_tail_within
     {theta S Sprime : ℝ → ℝ}
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
     (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
@@ -172,5 +173,26 @@ theorem automatic_positive_score_and_exponential_tail
     ⟨R, c, hR, hc, hS_lower⟩
   refine ⟨R, c, hR, hc, hS_lower, ?_⟩
   exact theta_le_exp_tail hR hc htheta_pos htheta_deriv hS_lower
+
+/-- Backward-compatible version of `automatic_positive_score_and_exponential_tail_within`.
+This wrapper keeps the existing development compiling while downstream theorems
+are migrated to one-sided half-line regularity. It will not be used by the final
+publication theorem. -/
+theorem automatic_positive_score_and_exponential_tail
+    {theta S Sprime : ℝ → ℝ}
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    ∃ R c : ℝ, 0 ≤ R ∧ 0 < c ∧
+      (∀ x, R ≤ x → c ≤ S x) ∧
+      (∀ x, R ≤ x → theta x ≤ theta R * Real.exp (-c * (x - R))) := by
+  exact automatic_positive_score_and_exponential_tail_within
+    htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos
 
 end ScoreCurvatureStarOrder
