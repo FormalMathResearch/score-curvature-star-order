@@ -95,6 +95,13 @@ theorem powerWeightedShiftCumulativeRadialRatio_hasDerivAt_within
   have hDne : powerWeightedShiftRadialDensity theta a p x ≠ 0 :=
     powerWeightedShiftRadialDensity_ne_zero_within
       ha hp hx htheta_pos htheta_deriv htheta_int hS hSprime_pos
-  simpa [powerWeightedShiftCumulativeRadialRatio] using hA.div hD hDne
+  have hfun :
+      (fun y : ℝ => powerWeightedShiftCumulativeRadialRatio theta S a p y) =
+        ((fun y : ℝ => powerWeightedShiftCumulativeShiftNumerator theta S a p y) /
+          (fun y : ℝ => powerWeightedShiftRadialDensity theta a p y)) := by
+    funext y
+    rfl
+  rw [hfun]
+  exact hA.div hD hDne
 
 end ScoreCurvatureStarOrder
