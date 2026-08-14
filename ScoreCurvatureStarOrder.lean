@@ -6,3 +6,4 @@ import ScoreCurvatureStarOrder.GlobalKernel
 import ScoreCurvatureStarOrder.Tail
 import ScoreCurvatureStarOrder.Moments
 import ScoreCurvatureStarOrder.Boundary
+import ScoreCurvatureStarOrder.ScoreIntegrability
