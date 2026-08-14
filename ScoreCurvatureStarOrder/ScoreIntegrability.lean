@@ -18,12 +18,12 @@ theorem powerWeightedShift_product_deriv
   have hrpow :
       HasDerivAt (fun y : ℝ => y ^ (p + 1)) ((p + 1) * x ^ p) x := by
     have h := Real.hasDerivAt_rpow_const (x := x) (p := p + 1) (Or.inl hx.ne')
-    convert h using 1 <;> ring
+    convert h using 1 <;> ring_nf
   have hshift : HasDerivAt (fun y : ℝ => a + y) 1 x := by
-    simpa using (hasDerivAt_const x a).add (hasDerivAt_id x)
+    convert (hasDerivAt_const x a).add (hasDerivAt_id x) using 1 <;> simp [Pi.add_apply]
   have htheta_shift :
       HasDerivAt (fun y : ℝ => theta (a + y)) (-S (a + x) * theta (a + x)) x := by
-    simpa using (htheta_deriv (a + x) hax).comp x hshift
-  convert hrpow.mul htheta_shift using 1 <;> ring
+    simpa only [Function.comp_def] using (htheta_deriv (a + x) hax).comp x hshift
+  convert hrpow.mul htheta_shift using 1 <;> ring_nf
 
 end ScoreCurvatureStarOrder
