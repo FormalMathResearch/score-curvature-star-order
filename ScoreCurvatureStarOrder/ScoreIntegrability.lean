@@ -59,14 +59,17 @@ theorem powerWeightedShift_product_deriv_nonpos_tail
   have hp1 : 0 < p + 1 := by
     linarith
   have hquot : 0 < (p + 1) / c := div_pos hp1 hc
-  have hTpos : 0 < T := by
-    exact lt_of_lt_of_le hquot (by simpa [T] using le_max_right R ((p + 1) / c))
+  have hRT : R ≤ T := by
+    dsimp [T]
+    exact le_max_left _ _
+  have hquotT : (p + 1) / c ≤ T := by
+    dsimp [T]
+    exact le_max_right _ _
+  have hTpos : 0 < T := hquot.trans_le hquotT
   refine ⟨T, hTpos, ?_⟩
   intro x hTx
-  have hRx : R ≤ x := by
-    exact (by simpa [T] using le_max_left R ((p + 1) / c)).trans hTx
-  have hquotx : (p + 1) / c ≤ x := by
-    exact (by simpa [T] using le_max_right R ((p + 1) / c)).trans hTx
+  have hRx : R ≤ x := hRT.trans hTx
+  have hquotx : (p + 1) / c ≤ x := hquotT.trans hTx
   have hxpos : 0 < x := hTpos.trans_le hTx
   have hax0 : 0 ≤ a + x := by
     linarith
