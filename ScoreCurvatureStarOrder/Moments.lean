@@ -129,4 +129,38 @@ theorem powerWeightedShift_integrableOn_Ioi
     rw [abs_of_nonneg hf_nonneg, abs_of_nonneg hg_nonneg]
     exact hprod
 
+/-- The normalization moment of the power-weighted shifted kernel. -/
+noncomputable def powerWeightedShiftMoment (theta : ℝ → ℝ) (a p : ℝ) : ℝ :=
+  ∫ x : ℝ in Set.Ioi 0, x ^ p * theta (a + x)
+
+/-- Under the project hypotheses, the normalization moment is strictly positive. -/
+theorem powerWeightedShiftMoment_pos
+    {theta S Sprime : ℝ → ℝ} {a p : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    0 < powerWeightedShiftMoment theta a p := by
+  have hint :
+      IntegrableOn (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi (0 : ℝ)) :=
+    powerWeightedShift_integrableOn_Ioi
+      ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
+  have hsupp :
+      Function.support (fun x : ℝ => x ^ p * theta (a + x)) ∩ Set.Ioi 0 = Set.Ioi 0 := by
+    rw [inter_eq_right]
+    intro x hx
+    rw [Function.mem_support]
+    have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
+    exact mul_ne_zero (Real.rpow_pos_of_pos hx p).ne' (htheta_pos (a + x) hax0).ne'
+  rw [powerWeightedShiftMoment, setIntegral_pos_iff_support_of_nonneg_ae]
+  · rw [hsupp, volume_Ioi, ← ENNReal.ofReal_zero]
+    exact ENNReal.ofReal_lt_top
+  · refine eventually_of_mem (self_mem_ae_restrict measurableSet_Ioi) ?_
+    intro x hx
+    have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
+    exact (mul_pos (Real.rpow_pos_of_pos hx p) (htheta_pos (a + x) hax0)).le
+  · exact hint
+
 end ScoreCurvatureStarOrder
