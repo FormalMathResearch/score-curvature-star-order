@@ -41,10 +41,11 @@ theorem powerWeightedShiftMoment_hasDerivAt
   let s : Set ℝ := Set.Ioo (a / 2) (a + 1)
   have hs : s ∈ 𝓝 a := by
     dsimp [s]
-    exact Set.Ioo_mem_nhds (by linarith) (by linarith)
+    exact isOpen_Ioo.mem_nhds ⟨by linarith, by linarith⟩
   have hs_nonneg : ∀ b ∈ s, 0 ≤ b := by
     intro b hb
     dsimp [s] at hb
+    rcases hb with ⟨hb_lower, _⟩
     linarith
   have hs_upper : ∀ b ∈ s, b ≤ a + 1 := by
     intro b hb
@@ -93,7 +94,8 @@ theorem powerWeightedShiftMoment_hasDerivAt
     have hint := powerWeightedShift_integrableOn_Ioi
       (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := p)
       ha.le hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
-    simpa [F] using hint
+    change IntegrableOn (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi (0 : ℝ))
+    exact hint
 
   have hF'_meas :
       AEStronglyMeasurable (F' a) (volume.restrict (Set.Ioi (0 : ℝ))) := by
@@ -113,7 +115,9 @@ theorem powerWeightedShiftMoment_hasDerivAt
         (htheta_deriv (a + x) hax0).continuousAt.comp hshift
       exact (hSc.neg.mul htc).continuousWithinAt
     have hcont : ContinuousOn (F' a) (Set.Ioi (0 : ℝ)) := by
-      simpa [F'] using hrpow_cont.mul hscore_cont
+      change ContinuousOn
+        (fun x : ℝ => x ^ p * (-S (a + x) * theta (a + x))) (Set.Ioi (0 : ℝ))
+      exact hrpow_cont.mul hscore_cont
     exact hcont.aestronglyMeasurable measurableSet_Ioi
 
   have h_bound :
@@ -128,21 +132,37 @@ theorem powerWeightedShiftMoment_hasDerivAt
     · have hbA : b ∈ Set.Icc 0 (a + 1) := ⟨hb0, hs_upper b hb⟩
       have hxI : x ∈ Set.Icc 0 B := ⟨hx0, hxB⟩
       have hloc := hlocal b x hbA hxI
-      simp only [F', Real.norm_eq_abs, abs_mul, abs_of_nonneg hpow0]
-      rw [show bound x = C * x ^ p by simp [bound, hxB]]
+      have hinner : ‖-S (b + x) * theta (b + x)‖ ≤ C := by
+        simpa only [Real.norm_eq_abs] using hloc
+      have hboundx : bound x = C * x ^ p := by
+        simp only [bound, if_pos hxB]
       calc
-        x ^ p * |(-S (b + x) * theta (b + x))| ≤ x ^ p * C :=
-          mul_le_mul_of_nonneg_left hloc hpow0
-        _ = C * x ^ p := by ring
+        ‖F' b x‖ = ‖x ^ p‖ * ‖-S (b + x) * theta (b + x)‖ := by
+          change ‖x ^ p * (-S (b + x) * theta (b + x))‖ = _
+          exact norm_mul _ _
+        _ = x ^ p * ‖-S (b + x) * theta (b + x)‖ := by
+          rw [Real.norm_eq_abs, abs_of_nonneg hpow0]
+        _ ≤ x ^ p * C := mul_le_mul_of_nonneg_left hinner hpow0
+        _ = bound x := by
+          rw [hboundx]
+          ring
     · have hBx : B < x := lt_of_not_ge hxB
       have hT₀x : T₀ ≤ x := hT₀B.trans hBx.le
       have htail' := htail b x hb0 hT₀x
-      simp only [F', Real.norm_eq_abs, abs_mul, abs_of_nonneg hpow0]
-      rw [show bound x = x ^ p * S x * theta x by simp [bound, hxB]]
+      have hinner : ‖-S (b + x) * theta (b + x)‖ ≤ S x * theta x := by
+        simpa only [Real.norm_eq_abs] using htail'
+      have hboundx : bound x = x ^ p * S x * theta x := by
+        simp only [bound, if_neg hxB]
       calc
-        x ^ p * |(-S (b + x) * theta (b + x))| ≤ x ^ p * (S x * theta x) :=
-          mul_le_mul_of_nonneg_left htail' hpow0
-        _ = x ^ p * S x * theta x := by ring
+        ‖F' b x‖ = ‖x ^ p‖ * ‖-S (b + x) * theta (b + x)‖ := by
+          change ‖x ^ p * (-S (b + x) * theta (b + x))‖ = _
+          exact norm_mul _ _
+        _ = x ^ p * ‖-S (b + x) * theta (b + x)‖ := by
+          rw [Real.norm_eq_abs, abs_of_nonneg hpow0]
+        _ ≤ x ^ p * (S x * theta x) := mul_le_mul_of_nonneg_left hinner hpow0
+        _ = bound x := by
+          rw [hboundx]
+          ring
 
   have h_diff :
       ∀ᵐ x ∂volume.restrict (Set.Ioi (0 : ℝ)),
@@ -162,6 +182,9 @@ theorem powerWeightedShiftMoment_hasDerivAt
     (F := F) (x₀ := a) (s := s) (bound := bound)
     (μ := volume.restrict (Set.Ioi (0 : ℝ)))
     hs hF_meas hF_int hF'_meas h_bound hbound_set h_diff
-  simpa [F, F', powerWeightedShiftMoment] using hparam.2
+  change HasDerivAt
+    (fun b : ℝ => ∫ x : ℝ, F b x ∂(volume.restrict (Set.Ioi (0 : ℝ))))
+    (∫ x : ℝ, F' a x ∂(volume.restrict (Set.Ioi (0 : ℝ)))) a
+  exact hparam.2
 
 end ScoreCurvatureStarOrder
