@@ -9,3 +9,4 @@ import ScoreCurvatureStarOrder.Boundary
 import ScoreCurvatureStarOrder.ScoreIntegrability
 import ScoreCurvatureStarOrder.IntegrationByParts
 import ScoreCurvatureStarOrder.Density
+import ScoreCurvatureStarOrder.Expectation
