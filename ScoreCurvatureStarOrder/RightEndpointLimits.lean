@@ -79,7 +79,7 @@ theorem powerWeightedShift_cumulative_and_radial_tendsto_atTop_zero_within
     have hscoreI :
         Integrable (fun t : ℝ => S (a + t) * f t)
           (volume.restrict (Set.Ioi (0 : ℝ))) := by
-      simpa using hscore
+      exact hscore.integrable
     have hrepl :
         (∫ t : ℝ in Set.Ioi 0, h t) =
           ∫ t : ℝ in Set.Ioi 0, (G * f t - S (a + t) * f t) := by
@@ -94,11 +94,15 @@ theorem powerWeightedShift_cumulative_and_radial_tendsto_atTop_zero_within
     ring
 
   have hiInter : (⋂ x : ℝ, Set.Ioi x) = (∅ : Set ℝ) := by
-    apply Set.eq_empty_iff_forall_not_mem.mpr
-    intro y hy
-    have hy' : y + 1 < y := by
-      exact (Set.mem_iInter.mp hy) (y + 1)
-    linarith
+    ext y
+    constructor
+    · intro hy
+      have hy' : y + 1 < y := by
+        exact (Set.mem_iInter.mp hy) (y + 1)
+      exfalso
+      linarith
+    · intro hy
+      simp at hy
 
   have htail :
       Tendsto (fun x : ℝ => ∫ t : ℝ in Set.Ioi x, h t) atTop (𝓝 0) := by
