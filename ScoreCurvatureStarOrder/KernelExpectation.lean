@@ -106,8 +106,6 @@ theorem powerWeightedShiftSlopeKernel_eq_integral_twoPointKernel_within
   have h2 := hSmean.const_mul (Sprime (a + x) * x)
   have h3 := hSmean.const_mul (S (a + x))
   have h4 := hf.const_mul (S (a + x) ^ 2)
-  have h12 := h1.sub h2
-  have h123 := h12.sub h3
   have hXS_id := powerWeightedShift_score_expectation_identity_within
     (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := p)
     ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
@@ -125,10 +123,14 @@ theorem powerWeightedShiftSlopeKernel_eq_integral_twoPointKernel_within
       (S (a + t) * powerWeightedShiftDensity theta a p t)
   let F4 : ℝ → ℝ := fun t =>
     S (a + x) ^ 2 * powerWeightedShiftDensity theta a p t
-  have h1F : IntegrableOn F1 (Set.Ioi (0 : ℝ)) := by simpa [F1] using h1
-  have h2F : IntegrableOn F2 (Set.Ioi (0 : ℝ)) := by simpa [F2] using h2
-  have h3F : IntegrableOn F3 (Set.Ioi (0 : ℝ)) := by simpa [F3] using h3
-  have h4F : IntegrableOn F4 (Set.Ioi (0 : ℝ)) := by simpa [F4] using h4
+  have h1F : Integrable F1 (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    simpa [F1] using h1
+  have h2F : Integrable F2 (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    simpa [F2] using h2
+  have h3F : Integrable F3 (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    simpa [F3] using h3
+  have h4F : Integrable F4 (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    simpa [F4] using h4
   have h12F := h1F.sub h2F
   have h123F := h12F.sub h3F
   have hkernel :
@@ -149,7 +151,18 @@ theorem powerWeightedShiftSlopeKernel_eq_integral_twoPointKernel_within
     unfold twoPointKernel
     ring
   rw [hkernel]
-  rw [integral_add h123F h4F, integral_sub h12F h3F, integral_sub h1F h2F]
+  change powerWeightedShiftSlopeKernel theta S Sprime a p x =
+    ∫ t : ℝ in Set.Ioi 0, (F1 - F2 - F3) t + F4 t
+  rw [integral_add h123F h4F]
+  change powerWeightedShiftSlopeKernel theta S Sprime a p x =
+    (∫ t : ℝ in Set.Ioi 0, (F1 - F2) t - F3 t) +
+      ∫ t : ℝ in Set.Ioi 0, F4 t
+  rw [integral_sub h12F h3F]
+  change powerWeightedShiftSlopeKernel theta S Sprime a p x =
+    ((∫ t : ℝ in Set.Ioi 0, F1 t - F2 t) -
+      ∫ t : ℝ in Set.Ioi 0, F3 t) +
+      ∫ t : ℝ in Set.Ioi 0, F4 t
+  rw [integral_sub h1F h2F]
   simp only [F1, F2, F3, F4, integral_const_mul]
   rw [hXS_id, hf_id]
   change powerWeightedShiftSlopeKernel theta S Sprime a p x =
