@@ -102,7 +102,13 @@ theorem powerWeightedShift_right_cumulativeRadialRatio_monotonicity_within
         (a := a) (p := p) (x := y)
         ha hp hypos htheta_pos htheta_deriv htheta_int hS hSprime_pos
       have hraw := hAy.sub (hDy.const_mul qx)
-      simpa [F, F', A, D] using hraw
+      have hfun :
+          ((fun z : ℝ => powerWeightedShiftCumulativeShiftNumerator theta S a p z) -
+            (fun z : ℝ => qx * powerWeightedShiftRadialDensity theta a p z)) = F := by
+        funext z
+        rfl
+      rw [← hfun]
+      simpa [F', A, D] using hraw
 
     have hFcont : ContinuousOn F (Set.Ici x) := by
       intro y hy
@@ -113,9 +119,12 @@ theorem powerWeightedShift_right_cumulativeRadialRatio_monotonicity_within
       exact (hFder y hy).differentiableAt.differentiableWithinAt
     have hFderiv_nonneg : ∀ y ∈ interior (Set.Ici x), 0 ≤ deriv F y := by
       intro y hyInt
-      have hxy : x < y := by
-        simpa only [interior_Ici] using hyInt
-      have hyIci : y ∈ Set.Ici x := hxy.le
+      rw [interior_Ici] at hyInt
+      change x < y at hyInt
+      have hxy : x < y := hyInt
+      have hyIci : y ∈ Set.Ici x := by
+        change x ≤ y
+        exact hxy.le
       have hx0y : x0 < y := hx0x.trans hxy
       have hypos : 0 < y := hx.trans hxy
       have hdenneg : p + 1 - y * S (a + y) < 0 := hdenright y hx0y
@@ -163,7 +172,13 @@ theorem powerWeightedShift_right_cumulativeRadialRatio_monotonicity_within
       simpa [F] using hsub
     have hFx_le_eventually : ∀ᶠ y in atTop, F x ≤ F y := by
       filter_upwards [eventually_ge_atTop x] with y hy
-      exact hFmono (show x ∈ Set.Ici x from le_rfl) hy hy
+      have hxmem : x ∈ Set.Ici x := by
+        change x ≤ x
+        exact le_rfl
+      have hymem : y ∈ Set.Ici x := by
+        change x ≤ y
+        exact hy
+      exact hFmono hxmem hymem hy
     have hFx_le_zero : F x ≤ 0 :=
       ge_of_tendsto hFlim hFx_le_eventually
     have hDpos : 0 < D x := by
@@ -177,7 +192,7 @@ theorem powerWeightedShift_right_cumulativeRadialRatio_monotonicity_within
       linarith
     have hratio : A x / D x ≤ q x :=
       (div_le_iff₀ hDpos).2 hA_le
-    simpa [R, A, D] using hratio
+    simpa [R, A, D, powerWeightedShiftCumulativeRadialRatio] using hratio
 
   have hRderiv_nonpos : ∀ x : ℝ, x0 < x → deriv R x ≤ 0 := by
     intro x hx0x
@@ -216,8 +231,8 @@ theorem powerWeightedShift_right_cumulativeRadialRatio_monotonicity_within
       mul_nonpos_of_nonneg_of_nonpos hfactor hbracket
     have hDne : D x ≠ 0 := hDpos.ne'
     have hAR : A x = R x * D x := by
-      dsimp [R, A, D, powerWeightedShiftCumulativeRadialRatio]
-      field_simp
+      change A x = (A x / D x) * D x
+      exact (div_mul_cancel₀ (A x) hDne).symm
     have hnum_nonpos :
         ((powerWeightedShiftDensity theta a p x *
             (powerWeightedShiftScoreMean theta S a p - S (a + x))) * D x -
