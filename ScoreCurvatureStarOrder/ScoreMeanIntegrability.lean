@@ -102,6 +102,7 @@ theorem powerWeightedShift_score_mean_integrableOn_Ioi
           mul_le_mul_of_nonneg_left htail' hpow0
         _ = ‖x ^ p * S x * theta x‖ := by
           rw [Real.norm_eq_abs, abs_of_nonneg hweighted_nonneg]
+          ring_nf
 
   have hscore_raw :
       IntegrableOn
@@ -109,6 +110,8 @@ theorem powerWeightedShift_score_mean_integrableOn_Ioi
         (Set.Ioi (0 : ℝ)) := by
     refine IntegrableOn.congr_fun hraw.neg ?_ measurableSet_Ioi
     intro x hx
+    change -(x ^ p * (-S (a + x) * theta (a + x))) =
+      x ^ p * S (a + x) * theta (a + x)
     ring
   have hscaled := hscore_raw.const_mul (powerWeightedShiftMoment theta a p)⁻¹
   refine IntegrableOn.congr_fun hscaled ?_ measurableSet_Ioi
