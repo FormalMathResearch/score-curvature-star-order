@@ -55,9 +55,9 @@ theorem exists_scoreRatio_lt_score_on_tail_within
     have hzRlt : R < z := by
       simpa only [interior_Ici, mem_Ioi] using hz
     have hzpos : 0 < z := hR.trans_lt hzRlt
-    exact
-      (hasDerivAt_of_pos_of_hasDerivWithinAt_Ici hzpos (hS z hzpos.le)).
-        differentiableAt.differentiableWithinAt
+    have hSat :=
+      hasDerivAt_of_pos_of_hasDerivWithinAt_Ici hzpos (hS z hzpos.le)
+    exact hSat.differentiableAt.differentiableWithinAt
   have hderiv_lower_int : ∀ z ∈ interior (Set.Ici R), c ^ 2 ≤ deriv S z := by
     intro z hz
     have hzRlt : R < z := by
@@ -150,9 +150,9 @@ theorem exists_scoreDeriv_lt_sq_on_tail_within
     have hzRlt : R < z := by
       simpa only [interior_Ici, mem_Ioi] using hz
     have hzpos : 0 < z := hR.trans_lt hzRlt
-    exact
-      (hasDerivAt_of_pos_of_hasDerivWithinAt_Ici hzpos (hS z hzpos.le)).
-        differentiableAt.differentiableWithinAt
+    have hSat :=
+      hasDerivAt_of_pos_of_hasDerivWithinAt_Ici hzpos (hS z hzpos.le)
+    exact hSat.differentiableAt.differentiableWithinAt
   have hderiv_nonneg : ∀ z ∈ interior (Set.Ici R), 0 ≤ deriv S z := by
     intro z hz
     have hzRlt : R < z := by
@@ -234,12 +234,13 @@ theorem exists_score_mul_theta_antitoneOn_tail_within
           (theta z * (Sprime z - S z ^ 2)) (interior (Set.Ici T)) z := by
     intro z hz
     have hz0 : z ∈ Set.Ici (0 : ℝ) := hinterior_subset hz
+    have hSwithin := (hS z hz0).mono hinterior_subset
+    have hthetawithin := (htheta_deriv z hz0).mono hinterior_subset
     have hraw :
         HasDerivWithinAt (fun y => S y * theta y)
           (Sprime z * theta z + S z * (-S z * theta z))
           (interior (Set.Ici T)) z :=
-      (hS z hz0).mono hinterior_subset |>.mul
-        ((htheta_deriv z hz0).mono hinterior_subset)
+      hSwithin.mul hthetawithin
     have hscalar :
         Sprime z * theta z + S z * (-S z * theta z) =
           theta z * (Sprime z - S z ^ 2) := by
