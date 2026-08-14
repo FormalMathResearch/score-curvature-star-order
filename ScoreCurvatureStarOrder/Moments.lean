@@ -155,7 +155,7 @@ theorem powerWeightedShiftMoment_pos
     have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
     exact mul_ne_zero (Real.rpow_pos_of_pos hx p).ne' (htheta_pos (a + x) hax0).ne'
   rw [powerWeightedShiftMoment, setIntegral_pos_iff_support_of_nonneg_ae]
-  · rw [hsupp, volume_Ioi, ← ENNReal.ofReal_zero]
+  · rw [hsupp, Real.volume_Ioi, ← ENNReal.ofReal_zero]
     exact ENNReal.ofReal_lt_top
   · refine eventually_of_mem (self_mem_ae_restrict measurableSet_Ioi) ?_
     intro x hx
