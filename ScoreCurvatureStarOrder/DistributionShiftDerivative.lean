@@ -275,9 +275,9 @@ theorem powerWeightedShiftCDF_hasDerivAt
           have hs1 := hscore.const_mul M⁻¹
           have hs2 := hbase.const_mul (G * M⁻¹)
           rw [integral_add hs1 hs2, integral_const_mul, integral_const_mul]
-          rfl
       _ = (N' + G * N) / M := by
           rw [div_eq_mul_inv]
+          ring
 
   have hquot := hNderiv.fun_div hMderiv hMne
   have hcoef :
