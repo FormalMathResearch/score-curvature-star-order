@@ -16,3 +16,4 @@ import ScoreCurvatureStarOrder.LocalShiftMajorant
 import ScoreCurvatureStarOrder.MomentShiftDerivative
 import ScoreCurvatureStarOrder.MomentLogDerivative
 import ScoreCurvatureStarOrder.DensityShiftDerivative
+import ScoreCurvatureStarOrder.RadialDensity
