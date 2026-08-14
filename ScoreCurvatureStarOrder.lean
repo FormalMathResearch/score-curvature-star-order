@@ -7,3 +7,4 @@ import ScoreCurvatureStarOrder.Tail
 import ScoreCurvatureStarOrder.Moments
 import ScoreCurvatureStarOrder.Boundary
 import ScoreCurvatureStarOrder.ScoreIntegrability
+import ScoreCurvatureStarOrder.IntegrationByParts
