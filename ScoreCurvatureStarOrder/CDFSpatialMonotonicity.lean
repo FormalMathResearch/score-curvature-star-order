@@ -100,7 +100,8 @@ theorem powerWeightedShiftCDF_hasDerivAt_x_within
       AEStronglyMeasurable g (volume.restrict (Set.Ioi (0 : ℝ))) :=
     hg_cont_Ioi.aestronglyMeasurable measurableSet_Ioi
   have hg_meas : StronglyMeasurableAtFilter g (𝓝 x) :=
-    hg_meas_restrict.stronglyMeasurableAtFilter_of_mem (Ioi_mem_nhds hx)
+    AEStronglyMeasurable.stronglyMeasurableAtFilter_of_mem
+      hg_meas_restrict (Ioi_mem_nhds hx)
 
   have hnum :
       HasDerivAt (fun y : ℝ => ∫ t : ℝ in 0..y, g t) (g x) x :=
