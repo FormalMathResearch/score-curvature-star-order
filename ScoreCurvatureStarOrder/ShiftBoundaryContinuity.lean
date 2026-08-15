@@ -175,7 +175,14 @@ theorem powerWeightedShiftMoment_continuousWithinAt_zero_within
         Tendsto (fun a : ℝ => theta (a + x))
           (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 (theta x)) :=
       htheta_at.tendsto.comp harg
-    have hprod := tendsto_const_nhds.mul htheta_lim
+    have hconst :
+        Tendsto (fun _a : ℝ => x ^ p)
+          (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 (x ^ p)) :=
+      tendsto_const_nhds
+    have hprod :
+        Tendsto (fun a : ℝ => x ^ p * theta (a + x))
+          (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 (x ^ p * theta x)) :=
+      hconst.mul htheta_lim
     simpa [F] using hprod
 
   have hDCT := MeasureTheory.tendsto_integral_filter_of_dominated_convergence
