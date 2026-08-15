@@ -37,3 +37,4 @@ import ScoreCurvatureStarOrder.RightCumulativeRadialRatio
 import ScoreCurvatureStarOrder.GlobalCumulativeRadialRatio
 import ScoreCurvatureStarOrder.QuantileExistence
 import ScoreCurvatureStarOrder.Quantile
+import ScoreCurvatureStarOrder.QuantileShiftContinuity
