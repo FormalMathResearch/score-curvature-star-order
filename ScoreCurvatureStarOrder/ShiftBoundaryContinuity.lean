@@ -160,9 +160,11 @@ theorem powerWeightedShiftMoment_continuousWithinAt_zero_within
       ∀ᵐ x ∂volume.restrict (Set.Ioi (0 : ℝ)),
         Tendsto (fun a : ℝ => F a x) (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 (F 0 x)) := by
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
+    have hxpos : 0 < x := hx
+    have hxI : x ∈ Set.Ici (0 : ℝ) := hxpos.le
     have htheta_at : ContinuousAt theta x :=
       (hasDerivAt_of_pos_of_hasDerivWithinAt_Ici
-        hx (htheta_deriv x hx.le)).continuousAt
+        hxpos (htheta_deriv x hxI)).continuousAt
     have harg_full : Tendsto (fun a : ℝ => a + x) (𝓝 (0 : ℝ)) (𝓝 x) := by
       have hcont : ContinuousAt (fun a : ℝ => a + x) 0 := by fun_prop
       simpa using hcont.tendsto
@@ -183,6 +185,10 @@ theorem powerWeightedShiftMoment_continuousWithinAt_zero_within
     (l := 𝓝[Set.Ici (0 : ℝ)] 0)
     bound hF_meas h_bound hbound_set h_lim
 
+  change Tendsto
+    (fun a : ℝ => powerWeightedShiftMoment theta a p)
+    (𝓝[Set.Ici (0 : ℝ)] 0)
+    (𝓝 (powerWeightedShiftMoment theta 0 p))
   simpa [powerWeightedShiftMoment, F] using hDCT
 
 end ScoreCurvatureStarOrder
