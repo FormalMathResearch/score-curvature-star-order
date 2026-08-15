@@ -72,7 +72,9 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
     have hint := powerWeightedShift_integrableOn_Ioi_within
       (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := p)
       ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
-    simpa [F] using hint
+    change IntegrableOn
+      (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi (0 : ℝ))
+    exact hint
 
   have hF'_meas :
       AEStronglyMeasurable (F' p) (volume.restrict (Set.Ioi (0 : ℝ))) := by
@@ -102,7 +104,10 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
           IntegrableOn
             (fun x : ℝ => ‖x ^ plo * Real.log x * theta (a + x)‖)
             (Set.Ioc (0 : ℝ) 1) := by
-        simpa using hlo_local.norm
+        change Integrable
+          (fun x : ℝ => ‖x ^ plo * Real.log x * theta (a + x)‖)
+          (volume.restrict (Set.Ioc (0 : ℝ) 1))
+        exact hlo_local.norm
       refine IntegrableOn.congr_fun hlo_norm ?_ measurableSet_Ioc
       intro x hx
       simp [bound, hx.2]
@@ -112,12 +117,16 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
             (Set.Ioi (1 : ℝ)) :=
         hhi.mono_set (by
           intro x hx
+          change 1 < x at hx
           exact zero_lt_one.trans hx)
       have hhi_norm :
           IntegrableOn
             (fun x : ℝ => ‖x ^ phi * Real.log x * theta (a + x)‖)
             (Set.Ioi (1 : ℝ)) := by
-        simpa using hhi_local.norm
+        change Integrable
+          (fun x : ℝ => ‖x ^ phi * Real.log x * theta (a + x)‖)
+          (volume.restrict (Set.Ioi (1 : ℝ)))
+        exact hhi_local.norm
       refine IntegrableOn.congr_fun hhi_norm ?_ measurableSet_Ioi
       intro x hx
       have hxnot : ¬ x ≤ 1 := not_le.mpr hx
@@ -138,13 +147,13 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
       have hnorm_q :
           ‖F' q x‖ = x ^ q * (|Real.log x| * |theta (a + x)|) := by
         dsimp [F']
-        rw [Real.norm_eq_abs, abs_mul, abs_mul,
+        rw [abs_mul, abs_mul,
           abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
         ring
       have hnorm_plo :
           ‖x ^ plo * Real.log x * theta (a + x)‖ =
             x ^ plo * (|Real.log x| * |theta (a + x)|) := by
-        rw [Real.norm_eq_abs, abs_mul, abs_mul,
+        rw [abs_mul, abs_mul,
           abs_of_nonneg (Real.rpow_nonneg hxnonneg plo)]
         ring
       calc
@@ -159,13 +168,13 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
       have hnorm_q :
           ‖F' q x‖ = x ^ q * (|Real.log x| * |theta (a + x)|) := by
         dsimp [F']
-        rw [Real.norm_eq_abs, abs_mul, abs_mul,
+        rw [abs_mul, abs_mul,
           abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
         ring
       have hnorm_phi :
           ‖x ^ phi * Real.log x * theta (a + x)‖ =
             x ^ phi * (|Real.log x| * |theta (a + x)|) := by
-        rw [Real.norm_eq_abs, abs_mul, abs_mul,
+        rw [abs_mul, abs_mul,
           abs_of_nonneg (Real.rpow_nonneg hxnonneg phi)]
         ring
       calc
