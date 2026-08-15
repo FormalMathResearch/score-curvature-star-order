@@ -46,7 +46,9 @@ theorem powerWeightedShiftCDFNumerator_continuousWithinAt_zero_within
     rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le hx.le]
     exact intervalIntegral.intervalIntegrable_rpow' hp
   have hbound_set : IntegrableOn bound (Set.Ioc 0 x) := by
-    simpa [bound] using hpow.const_mul C
+    have hlocal : IntegrableOn (fun t : ℝ => C * t ^ p) (Set.Ioc 0 x) :=
+      hpow.const_mul C
+    simpa [bound] using hlocal
 
   let F : ℝ → ℝ → ℝ := fun a t => t ^ p * theta (a + t)
 
@@ -133,7 +135,7 @@ theorem powerWeightedShiftCDFNumerator_continuousWithinAt_zero_within
   change Tendsto
     (fun a : ℝ => ∫ t : ℝ in Set.Ioc 0 x, t ^ p * theta (a + t))
     (𝓝[Set.Ici (0 : ℝ)] 0)
-    (𝓝 (∫ t : ℝ in Set.Ioc 0 x, t ^ p * theta t))
+    (𝓝 (∫ t : ℝ in Set.Ioc 0 x, t ^ p * theta (0 + t)))
   simpa [F] using hDCT
 
 /-- For every fixed positive spatial endpoint, the normalized CDF is
@@ -163,6 +165,16 @@ theorem powerWeightedShiftCDF_continuousWithinAt_zero_within
       (theta := theta) (S := S) (Sprime := Sprime) (a := 0) (p := p)
       (by norm_num) hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
   have hquot := hnum.div hden hMpos.ne'
-  simpa [powerWeightedShiftCDF] using hquot
+  unfold powerWeightedShiftCDF
+  have hfun :
+      (fun a : ℝ =>
+        (∫ t : ℝ in Set.Ioc 0 x, t ^ p * theta (a + t)) /
+          powerWeightedShiftMoment theta a p) =
+      ((fun a : ℝ => ∫ t : ℝ in Set.Ioc 0 x, t ^ p * theta (a + t)) /
+        (fun a : ℝ => powerWeightedShiftMoment theta a p)) := by
+    funext a
+    rfl
+  rw [hfun]
+  exact hquot
 
 end ScoreCurvatureStarOrder
