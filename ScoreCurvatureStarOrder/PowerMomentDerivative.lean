@@ -153,6 +153,7 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
       have hnorm_plo :
           ‖x ^ plo * Real.log x * theta (a + x)‖ =
             x ^ plo * (|Real.log x| * |theta (a + x)|) := by
+        change |x ^ plo * Real.log x * theta (a + x)| = _
         rw [abs_mul, abs_mul,
           abs_of_nonneg (Real.rpow_nonneg hxnonneg plo)]
         ring
@@ -174,6 +175,7 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
       have hnorm_phi :
           ‖x ^ phi * Real.log x * theta (a + x)‖ =
             x ^ phi * (|Real.log x| * |theta (a + x)|) := by
+        change |x ^ phi * Real.log x * theta (a + x)| = _
         rw [abs_mul, abs_mul,
           abs_of_nonneg (Real.rpow_nonneg hxnonneg phi)]
         ring
