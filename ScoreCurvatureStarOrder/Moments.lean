@@ -1,5 +1,6 @@
 import Mathlib
 import ScoreCurvatureStarOrder.Tail
+import ScoreCurvatureStarOrder.HalfLineRegularity
 
 namespace ScoreCurvatureStarOrder
 
@@ -40,31 +41,36 @@ theorem rpow_mul_exp_neg_integrableOn_Ioi
         exact (zero_lt_one.trans_le hx1).ne')).mul (by fun_prop))
       (rpow_mul_exp_neg_isLittleO p hc).isBigO
 
-/-- Under the project hypotheses, every power-weighted shifted kernel with `p > -1` is integrable on `(0, ∞)`. -/
-theorem powerWeightedShift_integrableOn_Ioi
+/-- Under the project hypotheses, every power-weighted shifted kernel with
+`p > -1` is integrable on `(0, ∞)`.  Differentiability of `theta` and `S` is
+required only within the closed positive half-line. -/
+theorem powerWeightedShift_integrableOn_Ioi_within
     {theta S Sprime : ℝ → ℝ} {a p : ℝ}
     (ha : 0 ≤ a) (hp : -1 < p)
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
     (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
-    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
     (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
     IntegrableOn (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi (0 : ℝ)) := by
-  rcases automatic_positive_score_and_exponential_tail
+  rcases automatic_positive_score_and_exponential_tail_within
       htheta_pos htheta_deriv htheta_int hS hSprime_pos with
     ⟨R, c, hR, hc, _hS_lower, htail⟩
   let B : ℝ := max R 1
   have hRB : R ≤ B := le_max_left R 1
   have hB0 : 0 ≤ B := hR.trans hRB
+  have htheta_shift_Ici : ContinuousOn (fun x : ℝ => theta (a + x)) (Set.Ici (0 : ℝ)) :=
+    continuousOn_shift_Ici_of_hasDerivWithinAt ha htheta_deriv
   rw [← Ioc_union_Ioi_eq_Ioi hB0, integrableOn_union]
   constructor
   · rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le hB0]
-    have htheta_shift_cont : ContinuousOn (fun x : ℝ => theta (a + x)) [[0, B]] := by
-      intro x hx
-      rw [uIcc_of_le hB0] at hx
-      have hax0 : 0 ≤ a + x := by linarith [ha, hx.1]
-      have hshift : ContinuousAt (fun y : ℝ => a + y) x := by fun_prop
-      exact ((htheta_deriv (a + x) hax0).continuousAt.comp hshift).continuousWithinAt
+    have htheta_shift_cont : ContinuousOn (fun x : ℝ => theta (a + x)) [[0, B]] :=
+      htheta_shift_Ici.mono (by
+        intro x hx
+        rw [uIcc_of_le hB0] at hx
+        exact hx.1)
     exact (intervalIntegral.intervalIntegrable_rpow' hp).mul_continuousOn htheta_shift_cont
   · have hbase : IntegrableOn (fun x : ℝ => x ^ p * Real.exp (-c * x)) (Set.Ioi (0 : ℝ)) :=
       rpow_mul_exp_neg_integrableOn_Ioi hp hc
@@ -84,13 +90,8 @@ theorem powerWeightedShift_integrableOn_Ioi
         left
         change x ≠ 0
         exact hx0.ne')
-    have htheta_shift_cont : ContinuousOn (fun x : ℝ => theta (a + x)) (Set.Ioi B) := by
-      intro x hx
-      have hxB : B < x := hx
-      have hx0 : 0 < x := lt_of_le_of_lt hB0 hxB
-      have hax0 : 0 ≤ a + x := by linarith [ha, hx0.le]
-      have hshift : ContinuousAt (fun y : ℝ => a + y) x := by fun_prop
-      exact ((htheta_deriv (a + x) hax0).continuousAt.comp hshift).continuousWithinAt
+    have htheta_shift_cont : ContinuousOn (fun x : ℝ => theta (a + x)) (Set.Ioi B) :=
+      htheta_shift_Ici.mono (fun x hx => hB0.trans hx.le)
     have hfcont : ContinuousOn (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi B) :=
       hrpow_cont.mul htheta_shift_cont
     change Integrable (fun x : ℝ => x ^ p * theta (a + x)) (volume.restrict (Set.Ioi B))
@@ -129,12 +130,8 @@ theorem powerWeightedShift_integrableOn_Ioi
     rw [abs_of_nonneg hf_nonneg, abs_of_nonneg hg_nonneg]
     exact hprod
 
-/-- The normalization moment of the power-weighted shifted kernel. -/
-noncomputable def powerWeightedShiftMoment (theta : ℝ → ℝ) (a p : ℝ) : ℝ :=
-  ∫ x : ℝ in Set.Ioi 0, x ^ p * theta (a + x)
-
-/-- Under the project hypotheses, the normalization moment is strictly positive. -/
-theorem powerWeightedShiftMoment_pos
+/-- Backward-compatible wrapper for the old two-sided boundary assumptions. -/
+theorem powerWeightedShift_integrableOn_Ioi
     {theta S Sprime : ℝ → ℝ} {a p : ℝ}
     (ha : 0 ≤ a) (hp : -1 < p)
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
@@ -142,10 +139,34 @@ theorem powerWeightedShiftMoment_pos
     (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
     (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
     (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    IntegrableOn (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi (0 : ℝ)) := by
+  exact powerWeightedShift_integrableOn_Ioi_within
+    ha hp htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos
+
+/-- The normalization moment of the power-weighted shifted kernel. -/
+noncomputable def powerWeightedShiftMoment (theta : ℝ → ℝ) (a p : ℝ) : ℝ :=
+  ∫ x : ℝ in Set.Ioi 0, x ^ p * theta (a + x)
+
+/-- Under the project hypotheses, the normalization moment is strictly positive,
+with only one-sided differentiability required at the boundary. -/
+theorem powerWeightedShiftMoment_pos_within
+    {theta S Sprime : ℝ → ℝ} {a p : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
     0 < powerWeightedShiftMoment theta a p := by
   have hint :
       IntegrableOn (fun x : ℝ => x ^ p * theta (a + x)) (Set.Ioi (0 : ℝ)) :=
-    powerWeightedShift_integrableOn_Ioi
+    powerWeightedShift_integrableOn_Ioi_within
       ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
   have hsupp :
       Function.support (fun x : ℝ => x ^ p * theta (a + x)) ∩ Set.Ioi 0 = Set.Ioi 0 := by
@@ -162,5 +183,22 @@ theorem powerWeightedShiftMoment_pos
     have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
     exact (mul_pos (Real.rpow_pos_of_pos hx p) (htheta_pos (a + x) hax0)).le
   · exact hint
+
+/-- Backward-compatible wrapper for `powerWeightedShiftMoment_pos_within`. -/
+theorem powerWeightedShiftMoment_pos
+    {theta S Sprime : ℝ → ℝ} {a p : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    0 < powerWeightedShiftMoment theta a p := by
+  exact powerWeightedShiftMoment_pos_within
+    ha hp htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos
 
 end ScoreCurvatureStarOrder

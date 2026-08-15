@@ -1,5 +1,6 @@
 import Mathlib
 import ScoreCurvatureStarOrder.Density
+import ScoreCurvatureStarOrder.HalfLineRegularity
 
 namespace ScoreCurvatureStarOrder
 
@@ -21,12 +22,16 @@ noncomputable def powerWeightedShiftCumulativeShiftNumerator
       (powerWeightedShiftScoreMean theta S a p - S (a + t))
 
 /-- For `x > 0`, the cumulative centered-score term satisfies
-`A'(x) = f_{p,a}(x) (G_{p,a} - S(a+x))`. -/
-theorem powerWeightedShiftCumulativeShiftNumerator_hasDerivAt
+`A'(x) = f_{p,a}(x) (G_{p,a} - S(a+x))` under one-sided differentiability on
+`[0, ∞)`.  The proof uses only the resulting continuity on the half-line,
+including right continuity at the lower endpoint. -/
+theorem powerWeightedShiftCumulativeShiftNumerator_hasDerivAt_within
     {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
     (ha : 0 ≤ a) (hp : -1 < p) (hx : 0 < x)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
-    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z) :
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z) :
     HasDerivAt
       (fun y : ℝ => powerWeightedShiftCumulativeShiftNumerator theta S a p y)
       (powerWeightedShiftDensity theta a p x *
@@ -41,18 +46,18 @@ theorem powerWeightedShiftCumulativeShiftNumerator_hasDerivAt
       intro t ht
       left
       exact ht.ne')
+  have htheta_shift_Ici :
+      ContinuousOn (fun t : ℝ => theta (a + t)) (Set.Ici (0 : ℝ)) :=
+    continuousOn_shift_Ici_of_hasDerivWithinAt ha htheta_deriv
+  have hS_shift_Ici :
+      ContinuousOn (fun t : ℝ => S (a + t)) (Set.Ici (0 : ℝ)) :=
+    continuousOn_shift_Ici_of_hasDerivWithinAt ha hS
   have htheta_shift_cont :
-      ContinuousOn (fun t : ℝ => theta (a + t)) (Set.Ioi (0 : ℝ)) := by
-    intro t ht
-    have hat0 : 0 ≤ a + t := add_nonneg ha ht.le
-    have hshift : ContinuousAt (fun y : ℝ => a + y) t := by fun_prop
-    exact ((htheta_deriv (a + t) hat0).continuousAt.comp hshift).continuousWithinAt
+      ContinuousOn (fun t : ℝ => theta (a + t)) (Set.Ioi (0 : ℝ)) :=
+    htheta_shift_Ici.mono (fun t ht => show 0 ≤ t from ht.le)
   have hS_shift_cont :
-      ContinuousOn (fun t : ℝ => S (a + t)) (Set.Ioi (0 : ℝ)) := by
-    intro t ht
-    have hat0 : 0 ≤ a + t := add_nonneg ha ht.le
-    have hshift : ContinuousAt (fun y : ℝ => a + y) t := by fun_prop
-    exact ((hS (a + t) hat0).continuousAt.comp hshift).continuousWithinAt
+      ContinuousOn (fun t : ℝ => S (a + t)) (Set.Ioi (0 : ℝ)) :=
+    hS_shift_Ici.mono (fun t ht => show 0 ≤ t from ht.le)
   have hdensity_cont :
       ContinuousOn (fun t : ℝ => powerWeightedShiftDensity theta a p t) (Set.Ioi (0 : ℝ)) := by
     have hraw :
@@ -73,20 +78,16 @@ theorem powerWeightedShiftCumulativeShiftNumerator_hasDerivAt
     AEStronglyMeasurable.stronglyMeasurableAtFilter_of_mem
       (hcont.aestronglyMeasurable measurableSet_Ioi) hIoi_nhds
 
+  have huIcc_sub : [[0, x]] ⊆ Set.Ici (0 : ℝ) := by
+    intro t ht
+    rw [uIcc_of_le hx.le] at ht
+    exact ht.1
   have htheta_shift_uIcc :
-      ContinuousOn (fun t : ℝ => theta (a + t)) [[0, x]] := by
-    intro t ht
-    rw [uIcc_of_le hx.le] at ht
-    have hat0 : 0 ≤ a + t := add_nonneg ha ht.1
-    have hshift : ContinuousAt (fun y : ℝ => a + y) t := by fun_prop
-    exact ((htheta_deriv (a + t) hat0).continuousAt.comp hshift).continuousWithinAt
+      ContinuousOn (fun t : ℝ => theta (a + t)) [[0, x]] :=
+    htheta_shift_Ici.mono huIcc_sub
   have hS_shift_uIcc :
-      ContinuousOn (fun t : ℝ => S (a + t)) [[0, x]] := by
-    intro t ht
-    rw [uIcc_of_le hx.le] at ht
-    have hat0 : 0 ≤ a + t := add_nonneg ha ht.1
-    have hshift : ContinuousAt (fun y : ℝ => a + y) t := by fun_prop
-    exact ((hS (a + t) hat0).continuousAt.comp hshift).continuousWithinAt
+      ContinuousOn (fun t : ℝ => S (a + t)) [[0, x]] :=
+    hS_shift_Ici.mono huIcc_sub
   have hcoeff_cont :
       ContinuousOn
         (fun t : ℝ => theta (a + t) * M⁻¹ * (G - S (a + t))) [[0, x]] :=
@@ -103,5 +104,20 @@ theorem powerWeightedShiftCumulativeShiftNumerator_hasDerivAt
 
   have hftc := intervalIntegral.integral_hasDerivAt_right hint hmeas hcontAt
   simpa [powerWeightedShiftCumulativeShiftNumerator, h, G] using hftc
+
+/-- Backward-compatible wrapper for the former two-sided boundary assumptions. -/
+theorem powerWeightedShiftCumulativeShiftNumerator_hasDerivAt
+    {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p) (hx : 0 < x)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z) :
+    HasDerivAt
+      (fun y : ℝ => powerWeightedShiftCumulativeShiftNumerator theta S a p y)
+      (powerWeightedShiftDensity theta a p x *
+        (powerWeightedShiftScoreMean theta S a p - S (a + x))) x := by
+  exact powerWeightedShiftCumulativeShiftNumerator_hasDerivAt_within
+    ha hp hx
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    (fun z hz => (hS z hz).hasDerivWithinAt)
 
 end ScoreCurvatureStarOrder

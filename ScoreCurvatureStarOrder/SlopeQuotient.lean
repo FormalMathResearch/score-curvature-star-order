@@ -1,6 +1,7 @@
 import Mathlib
 import ScoreCurvatureStarOrder.CumulativeShiftNumerator
 import ScoreCurvatureStarOrder.RadialDensity
+import ScoreCurvatureStarOrder.HalfLineRegularity
 
 namespace ScoreCurvatureStarOrder
 
@@ -19,8 +20,46 @@ noncomputable def powerWeightedShiftSlopeKernel
     S (a + x) ^ 2 -
       powerWeightedShiftScoreMean theta S a p * S (a + x)
 
-/-- Wherever `D'(x) ≠ 0`, the ratio of the already verified derivative formulas for
-`A` and `D` reduces to the manuscript quotient `q`. -/
+/-- Wherever `D'(x) ≠ 0`, the ratio of the verified derivative formulas for
+`A` and `D` reduces to the manuscript quotient `q`, under only one-sided
+half-line differentiability assumptions. -/
+theorem powerWeightedShift_APrime_div_DPrime_eq_slopeQuotient_within
+    {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p) (hx : 0 < x)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z)
+    (hden : p + 1 - x * S (a + x) ≠ 0) :
+    deriv (fun y : ℝ =>
+      powerWeightedShiftCumulativeShiftNumerator theta S a p y) x /
+      deriv (fun y : ℝ => powerWeightedShiftRadialDensity theta a p y) x =
+        powerWeightedShiftSlopeQuotient theta S a p x := by
+  have hA := powerWeightedShiftCumulativeShiftNumerator_hasDerivAt_within
+    (theta := theta) (S := S) (Sprime := Sprime)
+    (a := a) (p := p) (x := x) ha hp hx htheta_deriv hS
+  have hD := powerWeightedShiftRadialDensity_hasDerivAt_within
+    (theta := theta) (S := S) (Sprime := Sprime)
+    (a := a) (p := p) (x := x) ha hp hx htheta_pos htheta_deriv htheta_int hS
+    hSprime_pos
+  have hMpos : 0 < powerWeightedShiftMoment theta a p :=
+    powerWeightedShiftMoment_pos_within
+      ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
+  have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
+  have hrpow_pos : 0 < x ^ p := Real.rpow_pos_of_pos hx p
+  have hdensity_pos : 0 < powerWeightedShiftDensity theta a p x := by
+    dsimp [powerWeightedShiftDensity]
+    exact div_pos (mul_pos hrpow_pos (htheta_pos (a + x) hax0)) hMpos
+  have hdensity_ne : powerWeightedShiftDensity theta a p x ≠ 0 := hdensity_pos.ne'
+  rw [hA.deriv, hD.deriv]
+  dsimp [powerWeightedShiftSlopeQuotient]
+  field_simp [hdensity_ne, hden]
+
+/-- Backward-compatible version of the `A'/D'=q` bridge under the former
+two-sided boundary assumptions. -/
 theorem powerWeightedShift_APrime_div_DPrime_eq_slopeQuotient
     {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
     (ha : 0 ≤ a) (hp : -1 < p) (hx : 0 < x)
@@ -34,28 +73,83 @@ theorem powerWeightedShift_APrime_div_DPrime_eq_slopeQuotient
       powerWeightedShiftCumulativeShiftNumerator theta S a p y) x /
       deriv (fun y : ℝ => powerWeightedShiftRadialDensity theta a p y) x =
         powerWeightedShiftSlopeQuotient theta S a p x := by
-  have hA := powerWeightedShiftCumulativeShiftNumerator_hasDerivAt
-    (theta := theta) (S := S) (Sprime := Sprime)
-    (a := a) (p := p) (x := x) ha hp hx htheta_deriv hS
-  have hD := powerWeightedShiftRadialDensity_hasDerivAt
-    (theta := theta) (S := S) (Sprime := Sprime)
-    (a := a) (p := p) (x := x) ha hp hx htheta_pos htheta_deriv htheta_int hS
-    hSprime_pos
-  have hMpos : 0 < powerWeightedShiftMoment theta a p :=
-    powerWeightedShiftMoment_pos
-      ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
-  have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
-  have hrpow_pos : 0 < x ^ p := Real.rpow_pos_of_pos hx p
-  have hdensity_pos : 0 < powerWeightedShiftDensity theta a p x := by
-    dsimp [powerWeightedShiftDensity]
-    exact div_pos (mul_pos hrpow_pos (htheta_pos (a + x) hax0)) hMpos
-  have hdensity_ne : powerWeightedShiftDensity theta a p x ≠ 0 := hdensity_pos.ne'
-  rw [hA.deriv, hD.deriv]
-  dsimp [powerWeightedShiftSlopeQuotient]
-  field_simp [hdensity_ne, hden]
+  exact powerWeightedShift_APrime_div_DPrime_eq_slopeQuotient_within
+    ha hp hx htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos hden
 
 /-- The manuscript quotient satisfies
-`q'(x) = -K(x) / (p+1-x S(a+x))^2` wherever its denominator is nonzero. -/
+`q'(x) = -K(x) / (p+1-x S(a+x))^2` at every strictly positive point where its
+denominator is nonzero, assuming only one-sided differentiability of `S` on
+`[0, ∞)`.  The ordinary derivative of the shift is recovered only at the
+strictly positive interior argument `a+x`. -/
+theorem powerWeightedShiftSlopeQuotient_hasDerivAt_within
+    {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
+    (ha : 0 ≤ a) (hx : 0 < x)
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
+    (hden : p + 1 - x * S (a + x) ≠ 0) :
+    HasDerivAt
+      (fun y : ℝ => powerWeightedShiftSlopeQuotient theta S a p y)
+      (-powerWeightedShiftSlopeKernel theta S Sprime a p x /
+        (p + 1 - x * S (a + x)) ^ 2) x := by
+  let G : ℝ := powerWeightedShiftScoreMean theta S a p
+  let sx : ℝ := S (a + x)
+  let spx : ℝ := Sprime (a + x)
+  have hax_pos : 0 < a + x := by linarith
+  have hSshift : HasDerivAt (fun y : ℝ => S (a + y)) spx x := by
+    simpa [spx] using
+      (hasDerivAt_shift_of_pos_of_hasDerivWithinAt_Ici
+        (f := S) (f' := Sprime) (a := a) (x := x) hax_pos hS)
+  have hnum0 := (hasDerivAt_const x G).sub hSshift
+  have hnum_fun :
+      ((fun _ : ℝ => G) - (fun y : ℝ => S (a + y))) =
+        (fun y : ℝ => G - S (a + y)) := by
+    funext y
+    rfl
+  have hnum : HasDerivAt (fun y : ℝ => G - S (a + y)) (-spx) x := by
+    rw [← hnum_fun]
+    simpa only [zero_sub] using hnum0
+  have hprod0 := (hasDerivAt_id x).mul hSshift
+  have hprod_fun :
+      (id * (fun y : ℝ => S (a + y))) =
+        (fun y : ℝ => y * S (a + y)) := by
+    funext y
+    rfl
+  have hprod :
+      HasDerivAt (fun y : ℝ => y * S (a + y)) (sx + x * spx) x := by
+    rw [← hprod_fun]
+    simpa only [sx, one_mul, id_eq] using hprod0
+  have hden0 := (hasDerivAt_const x (p + 1)).sub hprod
+  have hden_fun :
+      ((fun _ : ℝ => p + 1) - (fun y : ℝ => y * S (a + y))) =
+        (fun y : ℝ => p + 1 - y * S (a + y)) := by
+    funext y
+    rfl
+  have hdenDer :
+      HasDerivAt (fun y : ℝ => p + 1 - y * S (a + y)) (-(sx + x * spx)) x := by
+    rw [← hden_fun]
+    simpa only [zero_sub] using hden0
+  have hquot := hnum.fun_div hdenDer hden
+  have hcoef :
+      ((-spx) * (p + 1 - x * sx) -
+          (G - sx) * (-(sx + x * spx))) /
+          (p + 1 - x * sx) ^ 2 =
+        -powerWeightedShiftSlopeKernel theta S Sprime a p x /
+          (p + 1 - x * sx) ^ 2 := by
+    dsimp [powerWeightedShiftSlopeKernel, G, sx, spx]
+    ring
+  change HasDerivAt
+    (fun y : ℝ => (G - S (a + y)) / (p + 1 - y * S (a + y)))
+    (-powerWeightedShiftSlopeKernel theta S Sprime a p x /
+      (p + 1 - x * S (a + x)) ^ 2) x
+  rw [← hcoef]
+  simpa [G, sx] using hquot
+
+/-- Backward-compatible version under two-sided differentiability on the closed
+half-line. -/
 theorem powerWeightedShiftSlopeQuotient_hasDerivAt
     {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
     (ha : 0 ≤ a) (hx : 0 ≤ x)

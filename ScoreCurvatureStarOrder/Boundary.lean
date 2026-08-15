@@ -1,16 +1,19 @@
 import Mathlib
 import ScoreCurvatureStarOrder.Tail
+import ScoreCurvatureStarOrder.HalfLineRegularity
 
 namespace ScoreCurvatureStarOrder
 
 open Set Filter
 open scoped Topology
 
-/-- For `p > -1`, the integration-by-parts boundary term vanishes at the origin. -/
-theorem powerWeightedShift_boundary_zero
+/-- For `p > -1`, the integration-by-parts boundary term vanishes at the origin.
+Only one-sided differentiability of `theta` on `[0, ∞)` is required. -/
+theorem powerWeightedShift_boundary_zero_within
     {theta S : ℝ → ℝ} {a p : ℝ}
     (ha : 0 ≤ a) (hp : -1 < p)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z) :
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z) :
     Tendsto (fun x : ℝ => x ^ (p + 1) * theta (a + x))
       (nhdsWithin 0 (Set.Ioi 0)) (𝓝 0) := by
   have hp1 : 0 < p + 1 := by linarith
@@ -18,33 +21,47 @@ theorem powerWeightedShift_boundary_zero
       Tendsto (fun x : ℝ => x ^ (p + 1))
         (nhdsWithin 0 (Set.Ioi 0)) (𝓝 0) := by
     exact (tendsto_id.mono_left inf_le_left).rpow_const_nhds_zero hp1
-  have hshift :
-      Tendsto (fun x : ℝ => a + x)
-        (nhdsWithin 0 (Set.Ioi 0)) (𝓝 a) := by
-    have hfull_cont : ContinuousAt (fun x : ℝ => a + x) 0 := by
-      fun_prop
-    have hfull : Tendsto (fun x : ℝ => a + x) (𝓝 0) (𝓝 a) := by
-      simpa using hfull_cont.tendsto
-    exact hfull.mono_left inf_le_left
+  have htheta_shift :
+      ContinuousOn (fun x : ℝ => theta (a + x)) (Set.Ici (0 : ℝ)) :=
+    continuousOn_shift_Ici_of_hasDerivWithinAt ha htheta_deriv
   have htheta :
       Tendsto (fun x : ℝ => theta (a + x))
-        (nhdsWithin 0 (Set.Ioi 0)) (𝓝 (theta a)) :=
-    (htheta_deriv a ha).continuousAt.tendsto.comp hshift
+        (nhdsWithin 0 (Set.Ioi 0)) (𝓝 (theta a)) := by
+    have hcont :
+        ContinuousWithinAt (fun x : ℝ => theta (a + x)) (Set.Ioi (0 : ℝ)) 0 := by
+      apply (htheta_shift 0 (by simp)).mono
+      intro x hx
+      change 0 < x at hx
+      exact hx.le
+    simpa only [ContinuousWithinAt, add_zero] using hcont
   simpa using hxpow.mul htheta
+
+/-- Backward-compatible wrapper for the former two-sided boundary assumption. -/
+theorem powerWeightedShift_boundary_zero
+    {theta S : ℝ → ℝ} {a p : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z) :
+    Tendsto (fun x : ℝ => x ^ (p + 1) * theta (a + x))
+      (nhdsWithin 0 (Set.Ioi 0)) (𝓝 0) := by
+  exact powerWeightedShift_boundary_zero_within ha hp
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
 
 /-- The integration-by-parts boundary term also vanishes at `+∞`.
 The exponential tail dominates every real power, so this statement does not
-need the restriction `p > -1`. -/
-theorem powerWeightedShift_boundary_atTop
+need the restriction `p > -1`.  Differentiability is only assumed within the
+closed positive half-line. -/
+theorem powerWeightedShift_boundary_atTop_within
     {theta S Sprime : ℝ → ℝ} {a p : ℝ}
     (ha : 0 ≤ a)
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
     (htheta_int : MeasureTheory.IntegrableOn theta (Set.Ici (0 : ℝ)))
-    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
     (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
     Tendsto (fun x : ℝ => x ^ (p + 1) * theta (a + x)) atTop (𝓝 0) := by
-  rcases automatic_positive_score_and_exponential_tail
+  rcases automatic_positive_score_and_exponential_tail_within
       htheta_pos htheta_deriv htheta_int hS hSprime_pos with
     ⟨R, c, hR, hc, _hS_lower, htail⟩
   let K : ℝ := theta R * Real.exp (c * R)
@@ -88,5 +105,22 @@ theorem powerWeightedShift_boundary_atTop
           x ^ (p + 1) * (K * Real.exp (-c * x)) :=
         mul_le_mul_of_nonneg_left htheta_bound hxpow
       _ = K * (x ^ (p + 1) * Real.exp (-c * x)) := by ring
+
+/-- Backward-compatible wrapper for `powerWeightedShift_boundary_atTop_within`. -/
+theorem powerWeightedShift_boundary_atTop
+    {theta S Sprime : ℝ → ℝ} {a p : ℝ}
+    (ha : 0 ≤ a)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : MeasureTheory.IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    Tendsto (fun x : ℝ => x ^ (p + 1) * theta (a + x)) atTop (𝓝 0) := by
+  exact powerWeightedShift_boundary_atTop_within
+    ha htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos
 
 end ScoreCurvatureStarOrder

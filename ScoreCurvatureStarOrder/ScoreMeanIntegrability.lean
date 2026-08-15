@@ -7,23 +7,27 @@ namespace ScoreCurvatureStarOrder
 open Set MeasureTheory Filter
 open scoped Interval Topology
 
-/-- The score itself is absolutely integrable under every normalized power-weighted
-shifted density. This is the integrability needed to treat `G_{p,a}` as a genuine
-expectation and to linearize the kernel expectation. -/
-theorem powerWeightedShift_score_mean_integrableOn_Ioi
+/-- The score itself is absolutely integrable under every normalized
+power-weighted shifted density under the mathematically natural one-sided
+regularity assumptions on `[0, ∞)`.  This is the integrability needed to treat
+`G_{p,a}` as a genuine expectation and to linearize the kernel expectation. -/
+theorem powerWeightedShift_score_mean_integrableOn_Ioi_within
     {theta S Sprime Ssecond : ℝ → ℝ} {a p : ℝ}
     (ha : 0 ≤ a) (hp : -1 < p)
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
     (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
-    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
-    (hSprime : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt Sprime (Ssecond z) z)
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
+    (hSprime : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt Sprime (Ssecond z) (Set.Ici (0 : ℝ)) z)
     (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z)
     (hcurv : ∀ z ∈ Set.Ici (0 : ℝ), Ssecond z * S z - (Sprime z) ^ 2 ≤ 0) :
     IntegrableOn
       (fun x : ℝ => S (a + x) * powerWeightedShiftDensity theta a p x)
       (Set.Ioi (0 : ℝ)) := by
-  rcases exists_shifted_thetaDeriv_tail_majorant
+  rcases exists_shifted_thetaDeriv_tail_majorant_within
       htheta_pos htheta_deriv htheta_int hS hSprime hSprime_pos hcurv with
     ⟨T₀, hT₀, htail⟩
   let B : ℝ := max T₀ 1
@@ -34,6 +38,10 @@ theorem powerWeightedShift_score_mean_integrableOn_Ioi
     dsimp [B]
     exact le_max_right _ _
   have hB0 : 0 ≤ B := zero_le_one.trans h1B
+  have hS_shift_Ici : ContinuousOn (fun x : ℝ => S (a + x)) (Set.Ici (0 : ℝ)) :=
+    continuousOn_shift_Ici_of_hasDerivWithinAt ha hS
+  have htheta_shift_Ici : ContinuousOn (fun x : ℝ => theta (a + x)) (Set.Ici (0 : ℝ)) :=
+    continuousOn_shift_Ici_of_hasDerivWithinAt ha htheta_deriv
 
   have hraw :
       IntegrableOn
@@ -42,21 +50,22 @@ theorem powerWeightedShift_score_mean_integrableOn_Ioi
     rw [← Ioc_union_Ioi_eq_Ioi hB0, integrableOn_union]
     constructor
     · rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le hB0]
-      have hscore_cont :
-          ContinuousOn (fun x : ℝ => -S (a + x) * theta (a + x)) [[0, B]] := by
+      have hIcc_sub : [[0, B]] ⊆ Set.Ici (0 : ℝ) := by
         intro x hx
         rw [uIcc_of_le hB0] at hx
-        have hax0 : 0 ≤ a + x := add_nonneg ha hx.1
-        have hshift : ContinuousAt (fun y : ℝ => a + y) x := by fun_prop
-        have hSc : ContinuousAt (fun y : ℝ => S (a + y)) x :=
-          (hS (a + x) hax0).continuousAt.comp hshift
-        have htc : ContinuousAt (fun y : ℝ => theta (a + y)) x :=
-          (htheta_deriv (a + x) hax0).continuousAt.comp hshift
-        exact (hSc.neg.mul htc).continuousWithinAt
+        exact hx.1
+      have hS_shift_cont : ContinuousOn (fun x : ℝ => S (a + x)) [[0, B]] :=
+        hS_shift_Ici.mono hIcc_sub
+      have htheta_shift_cont :
+          ContinuousOn (fun x : ℝ => theta (a + x)) [[0, B]] :=
+        htheta_shift_Ici.mono hIcc_sub
+      have hscore_cont :
+          ContinuousOn (fun x : ℝ => -S (a + x) * theta (a + x)) [[0, B]] :=
+        hS_shift_cont.neg.mul htheta_shift_cont
       exact (intervalIntegral.intervalIntegrable_rpow' hp).mul_continuousOn hscore_cont
     · have hscore0 :
           IntegrableOn (fun x : ℝ => x ^ p * S x * theta x) (Set.Ioi (0 : ℝ)) :=
-        powerWeightedUnshifted_score_integrableOn_Ioi
+        powerWeightedUnshifted_score_integrableOn_Ioi_within
           hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
       have hscoreB :
           IntegrableOn (fun x : ℝ => x ^ p * S x * theta x) (Set.Ioi B) :=
@@ -66,17 +75,12 @@ theorem powerWeightedShift_score_mean_integrableOn_Ioi
           intro x hx
           left
           exact (zero_lt_one.trans_le (h1B.trans hx.le)).ne')
-      have hshift_score_cont :
-          ContinuousOn (fun x : ℝ => -S (a + x) * theta (a + x)) (Set.Ioi B) := by
+      have hIoi_sub : Set.Ioi B ⊆ Set.Ici (0 : ℝ) := by
         intro x hx
-        have hx0 : 0 ≤ x := hB0.trans hx.le
-        have hax0 : 0 ≤ a + x := add_nonneg ha hx0
-        have hshift : ContinuousAt (fun y : ℝ => a + y) x := by fun_prop
-        have hSc : ContinuousAt (fun y : ℝ => S (a + y)) x :=
-          (hS (a + x) hax0).continuousAt.comp hshift
-        have htc : ContinuousAt (fun y : ℝ => theta (a + y)) x :=
-          (htheta_deriv (a + x) hax0).continuousAt.comp hshift
-        exact (hSc.neg.mul htc).continuousWithinAt
+        exact (hB0.trans hx.le)
+      have hshift_score_cont :
+          ContinuousOn (fun x : ℝ => -S (a + x) * theta (a + x)) (Set.Ioi B) :=
+        (hS_shift_Ici.mono hIoi_sub).neg.mul (htheta_shift_Ici.mono hIoi_sub)
       have hraw_cont :
           ContinuousOn
             (fun x : ℝ => x ^ p * (-S (a + x) * theta (a + x))) (Set.Ioi B) :=
@@ -119,5 +123,26 @@ theorem powerWeightedShift_score_mean_integrableOn_Ioi
   dsimp [powerWeightedShiftDensity]
   rw [div_eq_mul_inv]
   ring
+
+/-- Backward-compatible wrapper for the former two-sided assumptions. -/
+theorem powerWeightedShift_score_mean_integrableOn_Ioi
+    {theta S Sprime Ssecond : ℝ → ℝ} {a p : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt Sprime (Ssecond z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z)
+    (hcurv : ∀ z ∈ Set.Ici (0 : ℝ), Ssecond z * S z - (Sprime z) ^ 2 ≤ 0) :
+    IntegrableOn
+      (fun x : ℝ => S (a + x) * powerWeightedShiftDensity theta a p x)
+      (Set.Ioi (0 : ℝ)) := by
+  exact powerWeightedShift_score_mean_integrableOn_Ioi_within ha hp htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    (fun z hz => (hSprime z hz).hasDerivWithinAt)
+    hSprime_pos hcurv
 
 end ScoreCurvatureStarOrder

@@ -1,28 +1,32 @@
 import Mathlib
+import ScoreCurvatureStarOrder.HalfLineRegularity
 
 namespace ScoreCurvatureStarOrder
 
 open Set MeasureTheory
 
 /-- A positive integrable kernel whose logarithmic score relation is
-`θ' = -S θ` must have positive score somewhere on `[0, ∞)`. -/
+`θ' = -S θ` must have positive score somewhere on `[0, ∞)`.
+
+The derivative hypothesis is deliberately formulated *within* `[0, ∞)`, so at
+`0` it only requires the mathematically natural right derivative. -/
 theorem exists_score_pos_of_integrable
     {theta S : ℝ → ℝ}
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
     (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ))) :
     ∃ R ∈ Set.Ici (0 : ℝ), 0 < S R := by
   by_contra hpos
   push_neg at hpos
-  have hcont : ContinuousOn theta (Set.Ici (0 : ℝ)) := by
-    intro z hz
-    exact (htheta_deriv z hz).continuousAt.continuousWithinAt
+  have hcont : ContinuousOn theta (Set.Ici (0 : ℝ)) :=
+    continuousOn_Ici_of_hasDerivWithinAt htheta_deriv
   have hder :
       ∀ z ∈ interior (Set.Ici (0 : ℝ)),
         HasDerivWithinAt theta (-S z * theta z)
           (interior (Set.Ici (0 : ℝ))) z := by
     intro z hz
-    exact (htheta_deriv z (interior_subset hz)).hasDerivWithinAt
+    exact (htheta_deriv z (interior_subset hz)).mono interior_subset
   have hmono : MonotoneOn theta (Set.Ici (0 : ℝ)) := by
     exact monotoneOn_of_hasDerivWithinAt_nonneg
       (convex_Ici (0 : ℝ)) hcont hder fun z hz => by
@@ -48,23 +52,25 @@ theorem exists_score_pos_of_integrable
   · simpa using hfinite
 
 /-- Under positive score derivative, the score is eventually bounded below by a
-strictly positive constant. -/
-theorem exists_positive_score_tail
+strictly positive constant. Score differentiability is only assumed within the
+closed positive half-line. -/
+theorem exists_positive_score_tail_within
     {theta S Sprime : ℝ → ℝ}
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
     (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
-    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
     (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
     ∃ R c : ℝ, 0 ≤ R ∧ 0 < c ∧ ∀ x, R ≤ x → c ≤ S x := by
-  have hcontS : ContinuousOn S (Set.Ici (0 : ℝ)) := by
-    intro z hz
-    exact (hS z hz).continuousAt.continuousWithinAt
+  have hcontS : ContinuousOn S (Set.Ici (0 : ℝ)) :=
+    continuousOn_Ici_of_hasDerivWithinAt hS
   have hderS :
       ∀ z ∈ interior (Set.Ici (0 : ℝ)),
         HasDerivWithinAt S (Sprime z) (interior (Set.Ici (0 : ℝ))) z := by
     intro z hz
-    exact (hS z (interior_subset hz)).hasDerivWithinAt
+    exact (hS z (interior_subset hz)).mono interior_subset
   have hmonoS : MonotoneOn S (Set.Ici (0 : ℝ)) := by
     exact monotoneOn_of_hasDerivWithinAt_nonneg
       (convex_Ici (0 : ℝ)) hcontS hderS
@@ -76,22 +82,50 @@ theorem exists_positive_score_tail
   have hx0 : x ∈ Set.Ici (0 : ℝ) := hR.trans hRx
   exact hmonoS hR hx0 hRx
 
+/-- Compatibility wrapper for the pre-refactor two-sided derivative interface.
+Downstream theorems are migrated away from this wrapper incrementally. -/
+theorem exists_positive_score_tail
+    {theta S Sprime : ℝ → ℝ}
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    ∃ R c : ℝ, 0 ≤ R ∧ 0 < c ∧ ∀ x, R ≤ x → c ≤ S x := by
+  exact exists_positive_score_tail_within
+    htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos
+
 /-- Once `S ≥ c > 0` on a tail, the relation `θ' = -S θ` gives the
-exponential tail bound directly via monotonicity of `x ↦ exp(c x) θ(x)`. -/
+exponential tail bound directly via monotonicity of `x ↦ exp(c x) θ(x)`.
+The boundary derivative of `theta` is only a within-derivative on `[0, ∞)`. -/
 theorem theta_le_exp_tail
     {theta S : ℝ → ℝ} {R c : ℝ}
     (hR : 0 ≤ R) (hc : 0 < c)
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
     (hS_lower : ∀ z, R ≤ z → c ≤ S z) :
     ∀ x, R ≤ x → theta x ≤ theta R * Real.exp (-c * (x - R)) := by
+  have hsub : Set.Ici R ⊆ Set.Ici (0 : ℝ) := by
+    intro z hz
+    exact hR.trans hz
   have hcont : ContinuousOn (fun z => Real.exp (c * z) * theta z) (Set.Ici R) := by
     intro z hz
-    have hz0 : z ∈ Set.Ici (0 : ℝ) := hR.trans hz
+    have hz0 : z ∈ Set.Ici (0 : ℝ) := hsub hz
     have hexp : HasDerivAt (fun y : ℝ => Real.exp (c * y))
         (Real.exp (c * z) * c) z := by
       simpa using ((hasDerivAt_id z).const_mul c).exp
-    exact (hexp.mul (htheta_deriv z hz0)).continuousAt.continuousWithinAt
+    have hthetaR :
+        HasDerivWithinAt theta (-S z * theta z) (Set.Ici R) z :=
+      (htheta_deriv z hz0).mono hsub
+    exact (hexp.hasDerivWithinAt.mul hthetaR).continuousWithinAt
+  have hsubInt : interior (Set.Ici R) ⊆ Set.Ici (0 : ℝ) := by
+    intro z hz
+    exact hR.trans (interior_subset hz)
   have hder :
       ∀ z ∈ interior (Set.Ici R),
         HasDerivWithinAt (fun y : ℝ => Real.exp (c * y) * theta y)
@@ -99,12 +133,11 @@ theorem theta_le_exp_tail
             Real.exp (c * z) * (-S z * theta z))
           (interior (Set.Ici R)) z := by
     intro z hz
-    have hzR : R ≤ z := interior_subset hz
-    have hz0 : z ∈ Set.Ici (0 : ℝ) := hR.trans hzR
+    have hz0 : z ∈ Set.Ici (0 : ℝ) := hsubInt hz
     have hexp : HasDerivAt (fun y : ℝ => Real.exp (c * y))
         (Real.exp (c * z) * c) z := by
       simpa using ((hasDerivAt_id z).const_mul c).exp
-    exact (hexp.mul (htheta_deriv z hz0)).hasDerivWithinAt
+    exact hexp.hasDerivWithinAt.mul ((htheta_deriv z hz0).mono hsubInt)
   have hnonpos :
       ∀ z ∈ interior (Set.Ici R),
         (Real.exp (c * z) * c) * theta z +
@@ -136,8 +169,32 @@ theorem theta_le_exp_tail
     _ = theta R * Real.exp (c * R - c * x) := by rw [← Real.exp_sub]
     _ = theta R * Real.exp (-c * (x - R)) := by ring_nf
 
-/-- Lemma 2.2 of the manuscript: integrability and strictly increasing score imply an
-automatic positive score tail and exponential decay of the kernel. -/
+/-- Lemma 2.2 of the manuscript in its mathematically natural half-line form:
+integrability and strictly increasing score imply an automatic positive score
+tail and exponential decay of the kernel. All differentiability hypotheses are
+formulated within `[0, ∞)`. -/
+theorem automatic_positive_score_and_exponential_tail_within
+    {theta S Sprime : ℝ → ℝ}
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    ∃ R c : ℝ, 0 ≤ R ∧ 0 < c ∧
+      (∀ x, R ≤ x → c ≤ S x) ∧
+      (∀ x, R ≤ x → theta x ≤ theta R * Real.exp (-c * (x - R))) := by
+  rcases exists_positive_score_tail_within
+      htheta_pos htheta_deriv htheta_int hS hSprime_pos with
+    ⟨R, c, hR, hc, hS_lower⟩
+  refine ⟨R, c, hR, hc, hS_lower, ?_⟩
+  exact theta_le_exp_tail hR hc htheta_pos htheta_deriv hS_lower
+
+/-- Backward-compatible version of `automatic_positive_score_and_exponential_tail_within`.
+This wrapper keeps the existing development compiling while downstream theorems
+are migrated to one-sided half-line regularity. It will not be used by the final
+publication theorem. -/
 theorem automatic_positive_score_and_exponential_tail
     {theta S Sprime : ℝ → ℝ}
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
@@ -148,10 +205,11 @@ theorem automatic_positive_score_and_exponential_tail
     ∃ R c : ℝ, 0 ≤ R ∧ 0 < c ∧
       (∀ x, R ≤ x → c ≤ S x) ∧
       (∀ x, R ≤ x → theta x ≤ theta R * Real.exp (-c * (x - R))) := by
-  rcases exists_positive_score_tail
-      htheta_pos htheta_deriv htheta_int hS hSprime_pos with
-    ⟨R, c, hR, hc, hS_lower⟩
-  refine ⟨R, c, hR, hc, hS_lower, ?_⟩
-  exact theta_le_exp_tail hR hc htheta_pos htheta_deriv hS_lower
+  exact automatic_positive_score_and_exponential_tail_within
+    htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos
 
 end ScoreCurvatureStarOrder

@@ -25,27 +25,30 @@ theorem powerWeightedShiftRadialDensity_eq_mul_density
   ring
 
 /-- For `x > 0`, the radial density satisfies
-`D'(x) = f_{p,a}(x) (p+1 - x S(a+x))`. -/
-theorem powerWeightedShiftRadialDensity_hasDerivAt
+`D'(x) = f_{p,a}(x) (p+1 - x S(a+x))` under the mathematically natural
+one-sided differentiability assumptions on `[0, ∞)`.  Ordinary differentiation
+of the shifted kernel is used only at the strictly positive point `a+x`. -/
+theorem powerWeightedShiftRadialDensity_hasDerivAt_within
     {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
     (ha : 0 ≤ a) (hp : -1 < p) (hx : 0 < x)
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
-    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
     (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
-    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
     (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
     HasDerivAt
       (fun y : ℝ => powerWeightedShiftRadialDensity theta a p y)
       (powerWeightedShiftDensity theta a p x *
         (p + 1 - x * S (a + x))) x := by
   have hMpos : 0 < powerWeightedShiftMoment theta a p :=
-    powerWeightedShiftMoment_pos
+    powerWeightedShiftMoment_pos_within
       ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
-  have hMne : powerWeightedShiftMoment theta a p ≠ 0 := hMpos.ne'
-  have hax0 : 0 ≤ a + x := add_nonneg ha hx.le
-  have hprod := powerWeightedShift_product_deriv
+  have haxpos : 0 < a + x := by linarith
+  have hprod := powerWeightedShift_product_deriv_within
     (theta := theta) (S := S) (a := a) (p := p) (x := x)
-    hx hax0 htheta_deriv
+    hx haxpos htheta_deriv
   have hscaled := hprod.mul_const (powerWeightedShiftMoment theta a p)⁻¹
   have hrpow_add : x ^ (p + 1) = x ^ p * x := by
     simpa using Real.rpow_add hx p 1
@@ -65,5 +68,25 @@ theorem powerWeightedShiftRadialDensity_hasDerivAt
       (p + 1 - x * S (a + x))) x
   rw [← hcoef]
   simpa [div_eq_mul_inv] using hscaled
+
+/-- Backward-compatible wrapper for the former two-sided boundary assumptions. -/
+theorem powerWeightedShiftRadialDensity_hasDerivAt
+    {theta S Sprime : ℝ → ℝ} {a p x : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p) (hx : 0 < x)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt theta (-S z * theta z) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ), HasDerivAt S (Sprime z) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    HasDerivAt
+      (fun y : ℝ => powerWeightedShiftRadialDensity theta a p y)
+      (powerWeightedShiftDensity theta a p x *
+        (p + 1 - x * S (a + x))) x := by
+  exact powerWeightedShiftRadialDensity_hasDerivAt_within
+    ha hp hx htheta_pos
+    (fun z hz => (htheta_deriv z hz).hasDerivWithinAt)
+    htheta_int
+    (fun z hz => (hS z hz).hasDerivWithinAt)
+    hSprime_pos
 
 end ScoreCurvatureStarOrder
