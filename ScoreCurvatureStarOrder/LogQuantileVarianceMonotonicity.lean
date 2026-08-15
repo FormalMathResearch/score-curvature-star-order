@@ -31,7 +31,7 @@ theorem unitInterval_variance_le_of_monotoneOn_increment
         (∫ u : ℝ in Set.Ioo (0 : ℝ) 1, f u) ^ 2 ≤
       (∫ u : ℝ in Set.Ioo (0 : ℝ) 1, (g u) ^ 2) -
         (∫ u : ℝ in Set.Ioo (0 : ℝ) 1, g u) ^ 2 := by
-  let h : ℝ → ℝ := fun u => g u - f u
+  let h : ℝ → ℝ := g - f
 
   have hh : IntegrableOn h (Set.Ioo (0 : ℝ) 1) := by
     simpa [h] using hg.sub hf
