@@ -36,3 +36,4 @@ import ScoreCurvatureStarOrder.RightEndpointLimits
 import ScoreCurvatureStarOrder.RightCumulativeRadialRatio
 import ScoreCurvatureStarOrder.GlobalCumulativeRadialRatio
 import ScoreCurvatureStarOrder.QuantileExistence
+import ScoreCurvatureStarOrder.Quantile
