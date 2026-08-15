@@ -53,6 +53,6 @@ theorem powerWeightedShiftMoment_logDerivative_hasDerivAt_power_within
     powerWeightedShiftMoment_pos_within
       ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
   have hquot := hL.div hM hMpos.ne'
-  simpa [pow_two] using hquot
+  simpa [Pi.div_apply, pow_two] using hquot
 
 end ScoreCurvatureStarOrder
