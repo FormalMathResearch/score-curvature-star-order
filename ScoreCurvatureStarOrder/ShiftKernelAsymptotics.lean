@@ -19,7 +19,7 @@ theorem shiftedTheta_locallyIntegrableOn_Ioi_within
     LocallyIntegrableOn (fun x : ℝ => theta (a + x)) (Set.Ioi (0 : ℝ)) := by
   have hcontIci : ContinuousOn (fun x : ℝ => theta (a + x)) (Set.Ici (0 : ℝ)) :=
     continuousOn_shift_Ici_of_hasDerivWithinAt ha htheta_deriv
-  exact (hcontIci.mono (fun x hx => hx.le)).locallyIntegrableOn
+  exact (hcontIci.mono (fun x hx => hx.le)).locallyIntegrableOn measurableSet_Ioi
 
 /-- Near the spatial origin, every nonnegative shift of `theta` is `O(1)`.
 This is the precise lower-end asymptotic input needed by the Mellin-transform
