@@ -117,7 +117,7 @@ theorem powerWeightedShift_momentRatio_hasDerivAt_power_within
   have hM₁pos : 0 < powerWeightedShiftMoment theta a₁ p :=
     powerWeightedShiftMoment_pos_within
       ha₁ hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
-  simpa using hM₂.div hM₁ hM₁pos.ne'
+  exact hM₂.fun_div hM₁ hM₁pos.ne'
 
 /-- The derivative from the preceding quotient rule is strictly negative.
 This is the covariance step of manuscript Theorem 5.4: the derivative equals
