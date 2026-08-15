@@ -46,6 +46,7 @@ theorem powerWeightedShift_thetaRatio_strictAntiOn_Ioi_within
 
   have hIoi_subset : Set.Ioi (0 : ℝ) ⊆ Set.Ici (0 : ℝ) := by
     intro x hx
+    change 0 < x at hx
     exact hx.le
 
   have htheta₁_cont :
