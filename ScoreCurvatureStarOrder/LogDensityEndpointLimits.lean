@@ -24,6 +24,9 @@ private theorem intervalIntegral_tendsto_left_zero_of_integrableOn_Ioi
     hint.mono_set Set.Ioc_subset_Ioi_self
   have hinterval : IntervalIntegrable g volume 0 R :=
     (intervalIntegrable_iff_integrableOn_Ioc_of_le hR.le).2 hIoc
+  have hintervalMinMax :
+      IntervalIntegrable g volume (min 0 0) (max 0 R) := by
+    simpa [max_eq_right hR.le] using hinterval
 
   have hcontIcc :
       ContinuousWithinAt
@@ -33,7 +36,7 @@ private theorem intervalIntegral_tendsto_left_zero_of_integrableOn_Ioi
       (intervalIntegral.continuousWithinAt_primitive
         (μ := volume) (f := g)
         (a := (0 : ℝ)) (b₀ := (0 : ℝ)) (b₁ := (0 : ℝ)) (b₂ := R)
-        (by simp) hinterval)
+        (by simp) hintervalMinMax)
   have hcontGT :
       ContinuousWithinAt
         (fun ε : ℝ => ∫ x : ℝ in 0..ε, g x)
