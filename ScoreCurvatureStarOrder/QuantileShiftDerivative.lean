@@ -49,9 +49,11 @@ theorem powerWeightedShiftDensity_continuousAt_prod_within
   have hpow : ContinuousAt (fun z : ℝ × ℝ => z.2 ^ p) (a, x) :=
     continuousAt_snd.rpow_const (Or.inl hx.ne')
   have hMpair : ContinuousAt (fun z : ℝ × ℝ => M z.1) (a, x) := by
-    exact Filter.Tendsto.comp hMcont continuousAt_fst
+    exact ContinuousAt.comp' hMcont continuousAt_fst
   have hquot := (hpow.mul htheta_comp).div hMpair hMpos.ne'
-  simpa [powerWeightedShiftDensity, M] using hquot
+  change ContinuousAt
+    (fun z : ℝ × ℝ => z.2 ^ p * theta (z.1 + z.2) / M z.1) (a, x)
+  simpa only [Pi.mul_apply, Pi.div_apply] using hquot
 
 /-- At every interior shift `a>0`, the canonical quantile has the implicit
 shift derivative
