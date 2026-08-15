@@ -145,7 +145,10 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
       ContinuousOn (fun u : ℝ => Real.log (Q u)) (Set.Ioo (0 : ℝ) 1) :=
     hQcont.log hQne
   have hphi_cont : ContinuousOn phi (Set.Ioo (0 : ℝ) 1) := by
-    simpa only [phi, pow_two] using hlogQcont.mul hlogQcont
+    intro u hu
+    change ContinuousWithinAt
+      (fun v : ℝ => (Real.log (Q v)) ^ 2) (Set.Ioo (0 : ℝ) 1) u
+    exact (hlogQcont u hu).pow 2
   have hphi_window_integrable :
       ∀ n : ℕ,
         IntegrableOn phi (Set.Ioc (F (eps n)) (F (R n)))
@@ -223,13 +226,17 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
     rw [← intervalIntegral.integral_of_le (hF_order n).le]
     exact htransport n
 
+  have hphi_nonneg (u : ℝ) : 0 ≤ phi u := by
+    simpa [phi] using sq_nonneg (Real.log (Q u))
+  have hphi_norm (u : ℝ) : ‖phi u‖ = phi u := by
+    rw [Real.norm_eq_abs, abs_of_nonneg (hphi_nonneg u)]
   have hQwindow_norm_eq (n : ℕ) :
       (∫ u : ℝ in Set.Ioc (F (eps n)) (F (R n)), ‖phi u‖
           ∂(volume.restrict (Set.Ioo (0 : ℝ) 1))) =
         ∫ x : ℝ in eps n..R n, g x := by
     rw [Measure.restrict_restrict_of_subset (hQwindow_subset n)]
     rw [← intervalIntegral.integral_of_le (hF_order n).le]
-    simp only [phi, Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+    simp_rw [hphi_norm]
     exact htransport n
 
   -- This is the non-circular step: finite window identities plus the spatial
