@@ -94,11 +94,14 @@ theorem powerWeightedShiftCDF_tendsto_one_atTop_within
       (MeasureTheory.intervalIntegral_tendsto_integral_Ioi
         (f := g) (μ := volume) (a := (0 : ℝ))
         (b := fun x : ℝ => x) hgIoi tendsto_id)
+  have hconst :
+      Tendsto (fun _ : ℝ => M⁻¹) atTop (𝓝 (M⁻¹)) :=
+    tendsto_const_nhds
   have hscaled :
       Tendsto
         (fun x : ℝ => M⁻¹ * (∫ t : ℝ in 0..x, g t))
         atTop (𝓝 1) := by
-    have hmul := tendsto_const_nhds.mul hprim
+    have hmul := hconst.mul hprim
     simpa [hMne] using hmul
 
   refine hscaled.congr' ?_
