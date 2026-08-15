@@ -38,7 +38,7 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
 
   -- A single cofinal family with positive finite endpoints.
   let c : ℕ → ℝ := fun n => (n : ℝ) + 2
-  let eps : ℕ → ℝ := fun n => (c n)⁻¹
+  let eps : ℕ → ℝ := fun n => 1 / c n
   let R : ℕ → ℝ := c
 
   have hc_pos (n : ℕ) : 0 < c n := by
@@ -48,14 +48,14 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
     simpa [R] using hc_pos n
   have heps_pos (n : ℕ) : 0 < eps n := by
     dsimp [eps]
-    exact inv_pos.mpr (hc_pos n)
+    exact div_pos zero_lt_one (hc_pos n)
   have heps_R (n : ℕ) : eps n < R n := by
     have hc2 : 2 ≤ c n := by
       dsimp [c]
       have hn : 0 ≤ (n : ℝ) := Nat.cast_nonneg n
       linarith
     dsimp [eps, R]
-    rw [inv_lt_iff₀ (hc_pos n)]
+    rw [div_lt_iff₀ (hc_pos n)]
     nlinarith
   have hc_top : Tendsto c atTop atTop := by
     simpa [c] using
@@ -65,7 +65,7 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
   have hR_top : Tendsto R atTop atTop := by
     simpa [R] using hc_top
   have heps_zero : Tendsto eps atTop (𝓝 0) := by
-    simpa [eps, Function.comp_def] using
+    simpa [eps, one_div, Function.comp_def] using
       (tendsto_inv_atTop_zero.comp hc_top)
   have heps_le_one (n : ℕ) : eps n ≤ 1 := by
     have hc1 : 1 ≤ c n := by
@@ -73,7 +73,7 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
       have hn : 0 ≤ (n : ℝ) := Nat.cast_nonneg n
       linarith
     dsimp [eps]
-    rw [inv_le_iff₀ (hc_pos n)]
+    rw [div_le_iff₀ (hc_pos n)]
     simpa using hc1
   have heps_Icc (n : ℕ) : eps n ∈ Set.Icc (0 : ℝ) 1 :=
     ⟨(heps_pos n).le, heps_le_one n⟩
@@ -92,7 +92,7 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
   have hF_left : Tendsto (fun n : ℕ => F (eps n)) atTop (𝓝 0) := by
     have h :=
       (hFcont (0 : ℝ) ⟨le_rfl, zero_le_one⟩).tendsto.comp heps_within
-    simpa [F] using h
+    simpa [F, Function.comp_def] using h
   have hF_atTop : Tendsto F atTop (𝓝 1) := by
     simpa [F] using
       (powerWeightedShiftCDF_tendsto_one_atTop_within
@@ -141,8 +141,11 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
       (a := a) (p := p) (u := u)
       ha hp hu.1 hu.2 htheta_pos htheta_deriv htheta_int hS hSprime_pos
     simpa [Q] using hQu.1.ne'
+  have hlogQcont :
+      ContinuousOn (fun u : ℝ => Real.log (Q u)) (Set.Ioo (0 : ℝ) 1) :=
+    hQcont.log hQne
   have hphi_cont : ContinuousOn phi (Set.Ioo (0 : ℝ) 1) := by
-    simpa [phi] using (hQcont.log hQne).pow 2
+    simpa only [phi, pow_two] using hlogQcont.mul hlogQcont
   have hphi_window_integrable :
       ∀ n : ℕ,
         IntegrableOn phi (Set.Ioc (F (eps n)) (F (R n)))
@@ -168,17 +171,24 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
         (a := a) (p := p)
         ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos)
   have hXcover :
-      AECover (volume.restrict (Set.Ioi (0 : ℝ))) atTop
-        (fun n : ℕ => Set.Ioc (eps n) (R n)) where
-    ae_eventually_mem := by
-      filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
+      AECover (volume.restrict (Set.Ioi (0 : ℝ))) (atTop : Filter ℕ)
+        (fun n : ℕ => Set.Ioc (eps n) (R n)) := by
+    refine MeasureTheory.aecover_restrict_of_ae_imp
+      (μ := volume) (l := (atTop : Filter ℕ))
+      (s := Set.Ioi (0 : ℝ))
+      (φ := fun n : ℕ => Set.Ioc (eps n) (R n))
+      measurableSet_Ioi ?_ ?_
+    · filter_upwards with x
+      intro hx
+      have hxpos : (0 : ℝ) < x := hx
       have hlo : ∀ᶠ n : ℕ in atTop, eps n < x :=
-        heps_zero.eventually (Iio_mem_nhds hx)
+        heps_zero.eventually (Iio_mem_nhds hxpos)
       have hhi : ∀ᶠ n : ℕ in atTop, x ≤ R n :=
         hR_top.eventually (eventually_ge_atTop x)
       filter_upwards [hlo, hhi] with n hnlo hnhi
       exact ⟨hnlo, hnhi⟩
-    measurableSet := fun _ => measurableSet_Ioc
+    · intro n
+      exact measurableSet_Ioc
   have hXset_tendsto :=
     hXcover.integral_tendsto_of_countably_generated hg_integrable
   have hXwindow_subset (n : ℕ) :
@@ -235,9 +245,11 @@ private theorem powerWeightedShift_logQuantile_sq_transport_package_within
     exact Eventually.of_forall fun n => (hQwindow_norm_eq n).symm
 
   have hQcover :
-      AECover (volume.restrict (Set.Ioo (0 : ℝ) 1)) atTop
+      AECover (volume.restrict (Set.Ioo (0 : ℝ) 1)) (atTop : Filter ℕ)
         (fun n : ℕ => Set.Ioc (F (eps n)) (F (R n))) :=
-    aecover_Ioo_of_Ioc hF_left hF_right
+    MeasureTheory.aecover_Ioo_of_Ioc
+      (μ := volume) (l := (atTop : Filter ℕ))
+      (A := (0 : ℝ)) (B := (1 : ℝ)) hF_left hF_right
   have hphi_integrable_restrict :
       Integrable phi (volume.restrict (Set.Ioo (0 : ℝ) 1)) :=
     hQcover.integrable_of_integral_norm_tendsto
