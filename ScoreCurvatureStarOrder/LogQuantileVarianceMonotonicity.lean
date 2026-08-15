@@ -60,7 +60,9 @@ theorem unitInterval_variance_le_of_monotoneOn_increment
     exact hprod.congr (Filter.Eventually.of_forall (fun u => rfl))
 
   have hhmono : MonotoneOn h (Set.Ioo (0 : ℝ) 1) := by
-    simpa [h] using hincmono
+    intro x hx y hy hxy
+    have hxy' := hincmono hx hy hxy
+    simpa [h] using hxy'
 
   have hcov : 0 ≤ unitIntervalCovariance f h :=
     unitIntervalCovariance_nonneg_of_monotoneOn
