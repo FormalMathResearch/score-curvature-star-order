@@ -44,6 +44,10 @@ theorem powerWeightedShift_quantileRatio_monotoneOn_Ioo_pos_shifts_within
           powerWeightedShiftQuantile theta a₁ p u)
       (Set.Ioo (0 : ℝ) 1) := by
   intro u hu v hv huv
+  by_cases huvEq : u = v
+  · subst v
+    exact le_rfl
+  have huvlt : u < v := lt_of_le_of_ne huv huvEq
 
   let Q : ℝ → ℝ → ℝ := fun a w => powerWeightedShiftQuantile theta a p w
   let R : ℝ → ℝ → ℝ := fun a x =>
@@ -65,7 +69,10 @@ theorem powerWeightedShift_quantileRatio_monotoneOn_Ioo_pos_shifts_within
       hapos hp hv.1 hv.2 htheta_pos htheta_deriv htheta_int hS hSprime
       hSprime_pos hcurv
     have hsub := hvDeriv.sub huDeriv
-    simpa [H, Q, R, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsub
+    have hsub' :
+        HasDerivAt H ((-R a (Q a v)) - (-R a (Q a u))) a := by
+      simpa [H, Q, R] using hsub
+    convert hsub' using 1 <;> ring
 
   have hHderiv_nonneg : ∀ a ∈ interior (Set.Icc a₁ a₂), 0 ≤ deriv H a := by
     intro a haInt
@@ -77,7 +84,7 @@ theorem powerWeightedShift_quantileRatio_monotoneOn_Ioo_pos_shifts_within
       (a := a) (p := p)
       hapos.le hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
     have hQuv : Q a u < Q a v := by
-      simpa [Q] using hQmono hu hv huv
+      simpa [Q] using hQmono hu hv huvlt
 
     have hQu := powerWeightedShiftQuantile_pos_and_CDF_eq_within
       (theta := theta) (S := S) (Sprime := Sprime)
