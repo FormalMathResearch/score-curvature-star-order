@@ -1,4 +1,5 @@
 import Mathlib
+import ScoreCurvatureStarOrder.Moments
 import ScoreCurvatureStarOrder.PowerLogMoments
 
 namespace ScoreCurvatureStarOrder
@@ -90,23 +91,33 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
   have hbound_set : IntegrableOn bound (Set.Ioi (0 : ℝ)) := by
     rw [← Ioc_union_Ioi_eq_Ioi (show (0 : ℝ) ≤ 1 by norm_num), integrableOn_union]
     constructor
-    · have hlo_norm :
+    · have hlo_local :
           IntegrableOn
-            (fun x : ℝ => ‖x ^ plo * Real.log x * theta (a + x)‖)
+            (fun x : ℝ => x ^ plo * Real.log x * theta (a + x))
             (Set.Ioc (0 : ℝ) 1) :=
-        hlo.norm.mono_set (by
+        hlo.mono_set (by
           intro x hx
           exact hx.1)
+      have hlo_norm :
+          IntegrableOn
+            (fun x : ℝ => ‖x ^ plo * Real.log x * theta (a + x)‖)
+            (Set.Ioc (0 : ℝ) 1) := by
+        simpa using hlo_local.norm
       refine IntegrableOn.congr_fun hlo_norm ?_ measurableSet_Ioc
       intro x hx
       simp [bound, hx.2]
-    · have hhi_norm :
+    · have hhi_local :
           IntegrableOn
-            (fun x : ℝ => ‖x ^ phi * Real.log x * theta (a + x)‖)
+            (fun x : ℝ => x ^ phi * Real.log x * theta (a + x))
             (Set.Ioi (1 : ℝ)) :=
-        hhi.norm.mono_set (by
+        hhi.mono_set (by
           intro x hx
           exact zero_lt_one.trans hx)
+      have hhi_norm :
+          IntegrableOn
+            (fun x : ℝ => ‖x ^ phi * Real.log x * theta (a + x)‖)
+            (Set.Ioi (1 : ℝ)) := by
+        simpa using hhi_local.norm
       refine IntegrableOn.congr_fun hhi_norm ?_ measurableSet_Ioi
       intro x hx
       have hxnot : ¬ x ≤ 1 := not_le.mpr hx
@@ -119,33 +130,49 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
     intro q hq
     have hxpos : 0 < x := hx
     have hxnonneg : 0 ≤ x := hxpos.le
+    have hA_nonneg : 0 ≤ |Real.log x| * |theta (a + x)| :=
+      mul_nonneg (abs_nonneg _) (abs_nonneg _)
     by_cases hx1 : x ≤ 1
     · have hrpow : x ^ q ≤ x ^ plo :=
         Real.rpow_le_rpow_of_exponent_ge hxpos hx1 hq.1.le
+      have hnorm_q :
+          ‖F' q x‖ = x ^ q * (|Real.log x| * |theta (a + x)|) := by
+        dsimp [F']
+        rw [Real.norm_eq_abs, abs_mul, abs_mul,
+          abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
+        ring
+      have hnorm_plo :
+          ‖x ^ plo * Real.log x * theta (a + x)‖ =
+            x ^ plo * (|Real.log x| * |theta (a + x)|) := by
+        rw [Real.norm_eq_abs, abs_mul, abs_mul,
+          abs_of_nonneg (Real.rpow_nonneg hxnonneg plo)]
+        ring
       calc
-        ‖F' q x‖ = x ^ q * ‖Real.log x * theta (a + x)‖ := by
-          dsimp [F']
-          rw [mul_assoc, norm_mul, Real.norm_eq_abs,
-            abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
-        _ ≤ x ^ plo * ‖Real.log x * theta (a + x)‖ :=
-          mul_le_mul_of_nonneg_right hrpow (norm_nonneg _)
-        _ = ‖x ^ plo * Real.log x * theta (a + x)‖ := by
-          rw [mul_assoc, norm_mul, Real.norm_eq_abs,
-            abs_of_nonneg (Real.rpow_nonneg hxnonneg plo)]
+        ‖F' q x‖ = x ^ q * (|Real.log x| * |theta (a + x)|) := hnorm_q
+        _ ≤ x ^ plo * (|Real.log x| * |theta (a + x)|) :=
+          mul_le_mul_of_nonneg_right hrpow hA_nonneg
+        _ = ‖x ^ plo * Real.log x * theta (a + x)‖ := hnorm_plo.symm
         _ = bound x := by simp [bound, hx1]
     · have hx1lt : 1 < x := lt_of_not_ge hx1
       have hrpow : x ^ q ≤ x ^ phi :=
         Real.rpow_le_rpow_of_exponent_le hx1lt.le hq.2.le
+      have hnorm_q :
+          ‖F' q x‖ = x ^ q * (|Real.log x| * |theta (a + x)|) := by
+        dsimp [F']
+        rw [Real.norm_eq_abs, abs_mul, abs_mul,
+          abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
+        ring
+      have hnorm_phi :
+          ‖x ^ phi * Real.log x * theta (a + x)‖ =
+            x ^ phi * (|Real.log x| * |theta (a + x)|) := by
+        rw [Real.norm_eq_abs, abs_mul, abs_mul,
+          abs_of_nonneg (Real.rpow_nonneg hxnonneg phi)]
+        ring
       calc
-        ‖F' q x‖ = x ^ q * ‖Real.log x * theta (a + x)‖ := by
-          dsimp [F']
-          rw [mul_assoc, norm_mul, Real.norm_eq_abs,
-            abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
-        _ ≤ x ^ phi * ‖Real.log x * theta (a + x)‖ :=
-          mul_le_mul_of_nonneg_right hrpow (norm_nonneg _)
-        _ = ‖x ^ phi * Real.log x * theta (a + x)‖ := by
-          rw [mul_assoc, norm_mul, Real.norm_eq_abs,
-            abs_of_nonneg (Real.rpow_nonneg hxnonneg phi)]
+        ‖F' q x‖ = x ^ q * (|Real.log x| * |theta (a + x)|) := hnorm_q
+        _ ≤ x ^ phi * (|Real.log x| * |theta (a + x)|) :=
+          mul_le_mul_of_nonneg_right hrpow hA_nonneg
+        _ = ‖x ^ phi * Real.log x * theta (a + x)‖ := hnorm_phi.symm
         _ = bound x := by simp [bound, hx1]
 
   have h_diff :
@@ -153,8 +180,10 @@ theorem powerWeightedShiftMoment_hasDerivAt_power_within
         ∀ q ∈ s, HasDerivAt (F · x) (F' q x) q := by
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
     intro q hq
-    have hpow := (Real.hasStrictDerivAt_const_rpow hx q).hasDerivAt
-    have hmul := hpow.mul (hasDerivAt_const q (theta (a + x)))
+    have hpow :
+        HasDerivAt (fun r : ℝ => x ^ r) (x ^ q * Real.log x) q :=
+      (Real.hasStrictDerivAt_const_rpow hx q).hasDerivAt
+    have hmul := hpow.mul_const (theta (a + x))
     simpa [F, F', mul_assoc] using hmul
 
   have hparam := hasDerivAt_integral_of_dominated_loc_of_deriv_le
