@@ -21,6 +21,7 @@ import ScoreCurvatureStarOrder.Boundary
 import ScoreCurvatureStarOrder.ScoreIntegrability
 import ScoreCurvatureStarOrder.IntegrationByParts
 import ScoreCurvatureStarOrder.Density
+import ScoreCurvatureStarOrder.LogDensityIntegrability
 import ScoreCurvatureStarOrder.Expectation
 import ScoreCurvatureStarOrder.DerivativeTail
 import ScoreCurvatureStarOrder.ShiftDerivativeMajorant
