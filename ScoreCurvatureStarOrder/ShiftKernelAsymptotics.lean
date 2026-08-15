@@ -123,6 +123,6 @@ theorem shiftedTheta_isBigO_rpow_atTop_within
   rcases shiftedTheta_isBigO_exp_atTop_within
       ha htheta_pos htheta_deriv htheta_int hS hSprime_pos with
     ⟨c, hc, hOexp⟩
-  exact hOexp.trans (isLittleO_exp_neg_mul_rpow_atTop hc A).isBigO
+  exact hOexp.trans (isLittleO_exp_neg_mul_rpow_atTop hc (-A)).isBigO
 
 end ScoreCurvatureStarOrder
