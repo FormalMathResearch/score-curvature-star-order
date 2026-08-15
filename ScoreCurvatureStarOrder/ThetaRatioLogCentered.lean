@@ -166,7 +166,7 @@ theorem powerWeightedShift_thetaRatio_log_centered_integral_neg_within
     have hcomb := ((hrlogrho.sub hmrrho).sub hrc_logrho).add hrcm_rho
     refine IntegrableOn.congr_fun hcomb ?_ measurableSet_Ioi
     intro x hx
-    ring
+    ring_nf
 
   let F : ℝ → ℝ := fun x =>
     -((r x - r c) * (Real.log x - m) * rho x)
