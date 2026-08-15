@@ -8,6 +8,7 @@ import ScoreCurvatureStarOrder.GlobalKernel
 import ScoreCurvatureStarOrder.GlobalKernelWithin
 import ScoreCurvatureStarOrder.Tail
 import ScoreCurvatureStarOrder.Moments
+import ScoreCurvatureStarOrder.ShiftBoundaryContinuity
 import ScoreCurvatureStarOrder.Boundary
 import ScoreCurvatureStarOrder.ScoreIntegrability
 import ScoreCurvatureStarOrder.IntegrationByParts
