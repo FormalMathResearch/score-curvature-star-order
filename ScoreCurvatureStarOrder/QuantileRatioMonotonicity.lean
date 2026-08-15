@@ -69,10 +69,13 @@ theorem powerWeightedShift_quantileRatio_monotoneOn_Ioo_pos_shifts_within
       hapos hp hv.1 hv.2 htheta_pos htheta_deriv htheta_int hS hSprime
       hSprime_pos hcurv
     have hsub := hvDeriv.sub huDeriv
-    have hsub' :
-        HasDerivAt H ((-R a (Q a v)) - (-R a (Q a u))) a := by
-      simpa [H, Q, R] using hsub
-    convert hsub' using 1 <;> ring
+    have hfun :
+        ((fun b : ℝ => Real.log (powerWeightedShiftQuantile theta b p v)) -
+          (fun b : ℝ => Real.log (powerWeightedShiftQuantile theta b p u))) = H := by
+      funext b
+      rfl
+    rw [← hfun]
+    convert hsub using 1 <;> dsimp [Q, R] <;> ring
 
   have hHderiv_nonneg : ∀ a ∈ interior (Set.Icc a₁ a₂), 0 ≤ deriv H a := by
     intro a haInt
