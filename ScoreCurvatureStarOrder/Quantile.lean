@@ -57,6 +57,8 @@ theorem powerWeightedShiftQuantile_pos_and_CDF_eq_within
     by_contra hqx
     have hxq : x < q := lt_of_not_ge hqx
     have hlt := hstrict hx.1 hq.1 hxq
+    change powerWeightedShiftCDF theta a p x <
+      powerWeightedShiftCDF theta a p q at hlt
     rw [hq.2] at hlt
     exact (not_lt_of_ge hx.2) hlt
 
@@ -114,6 +116,9 @@ theorem powerWeightedShiftQuantile_strictMonoOn_Ioo_within
       rw [← hQu.2, ← hQv.2, heq]
     exact (ne_of_lt huv) huv_eq
   · have hlt := hstrict hQv.1 hQu.1 hvlt
+    change
+      powerWeightedShiftCDF theta a p (powerWeightedShiftQuantile theta a p v) <
+        powerWeightedShiftCDF theta a p (powerWeightedShiftQuantile theta a p u) at hlt
     rw [hQv.2, hQu.2] at hlt
     exact (not_lt_of_ge huv.le) hlt
 
