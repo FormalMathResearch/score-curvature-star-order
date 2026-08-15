@@ -54,9 +54,10 @@ theorem unitInterval_variance_le_of_monotoneOn_increment
     exact hprod.congr (Filter.Eventually.of_forall (fun u => rfl))
   have hhh :
       IntegrableOn (fun u : ℝ => h u * h u) (Set.Ioo (0 : ℝ) 1) := by
-    change Integrable (fun u : ℝ => h u * h u)
-      (volume.restrict (Set.Ioo (0 : ℝ) 1))
-    simpa using hhL2.integrable_mul hhL2
+    have hprod :
+        Integrable (h * h) (volume.restrict (Set.Ioo (0 : ℝ) 1)) :=
+      hhL2.integrable_mul hhL2
+    exact hprod.congr (Filter.Eventually.of_forall (fun u => rfl))
 
   have hhmono : MonotoneOn h (Set.Ioo (0 : ℝ) 1) := by
     simpa [h] using hincmono
