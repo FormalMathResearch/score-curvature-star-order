@@ -44,12 +44,12 @@ theorem powerWeightedShiftDensity_continuousAt_prod_within
   have harg : ContinuousAt (fun z : ℝ × ℝ => z.1 + z.2) (a, x) :=
     continuousAt_fst.add continuousAt_snd
   have htheta_comp :
-      ContinuousAt (fun z : ℝ × ℝ => theta (z.1 + z.2)) (a, x) :=
-    htheta_at.comp (a, x) harg
+      ContinuousAt (fun z : ℝ × ℝ => theta (z.1 + z.2)) (a, x) := by
+    exact Filter.Tendsto.comp htheta_at harg
   have hpow : ContinuousAt (fun z : ℝ × ℝ => z.2 ^ p) (a, x) :=
     continuousAt_snd.rpow_const (Or.inl hx.ne')
-  have hMpair : ContinuousAt (fun z : ℝ × ℝ => M z.1) (a, x) :=
-    hMcont.comp (a, x) continuousAt_fst
+  have hMpair : ContinuousAt (fun z : ℝ × ℝ => M z.1) (a, x) := by
+    exact Filter.Tendsto.comp hMcont continuousAt_fst
   have hquot := (hpow.mul htheta_comp).div hMpair hMpos.ne'
   simpa [powerWeightedShiftDensity, M] using hquot
 
@@ -210,7 +210,7 @@ theorem powerWeightedShiftQuantile_hasDerivAt_shift_within
   have hdpair : Tendsto (fun b : ℝ => d b (c b)) (𝓝 a) (𝓝 (d a q)) := by
     have hpair : Tendsto (fun b : ℝ => (b, c b)) (𝓝 a) (𝓝 (a, q)) :=
       tendsto_id.prodMk_nhds hc_tend
-    exact hdjoint.comp a hpair
+    exact Filter.Tendsto.comp hdjoint hpair
 
   have hslope_eq :
       (slope Q a) =ᶠ[𝓝[≠] a]
