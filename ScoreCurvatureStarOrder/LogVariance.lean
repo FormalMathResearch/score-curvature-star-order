@@ -104,6 +104,5 @@ theorem powerWeightedShift_logVariance_eq_moment_formula_within
   unfold powerWeightedShiftLogVariance
   rw [hmean, hsecond]
   field_simp [hMne]
-  ring
 
 end ScoreCurvatureStarOrder
