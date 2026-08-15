@@ -62,7 +62,7 @@ theorem powerWeightedShift_momentRatio_eq_thetaRatio_expectation_within
         rw [integral_const_mul]
       _ = (powerWeightedShiftMoment theta a₁ p)⁻¹ *
           powerWeightedShiftMoment theta a₂ p := by
-        rw [powerWeightedShiftMoment]
+        rfl
       _ = powerWeightedShiftMoment theta a₂ p /
           powerWeightedShiftMoment theta a₁ p := by
         rw [div_eq_mul_inv]
