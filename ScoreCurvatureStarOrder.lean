@@ -38,3 +38,4 @@ import ScoreCurvatureStarOrder.GlobalCumulativeRadialRatio
 import ScoreCurvatureStarOrder.QuantileExistence
 import ScoreCurvatureStarOrder.Quantile
 import ScoreCurvatureStarOrder.QuantileShiftContinuity
+import ScoreCurvatureStarOrder.QuantileShiftDerivative
