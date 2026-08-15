@@ -77,14 +77,9 @@ theorem powerWeightedShift_logQuantile_integral_CDF_window_within
     hthetaIci.mono (by
       intro x hx
       exact (hε.le.trans hx.1))
-  have hconst :
-      ContinuousOn
-        (fun _x : ℝ => (powerWeightedShiftMoment theta a p)⁻¹)
-        (Set.Icc ε R) :=
-    continuousOn_const
   have hfcontIcc : ContinuousOn f (Set.Icc ε R) := by
-    simpa [f, powerWeightedShiftDensity, div_eq_mul_inv, mul_assoc] using
-      (hpow.mul hthetaWin).mul hconst
+    simpa [f, powerWeightedShiftDensity, div_eq_mul_inv] using
+      (hpow.mul hthetaWin).mul_const (powerWeightedShiftMoment theta a p)⁻¹
   have hfcont : ContinuousOn f [[ε, R]] := by
     simpa [uIcc_of_le hεR.le] using hfcontIcc
 
@@ -141,8 +136,11 @@ theorem powerWeightedShift_logQuantile_integral_CDF_window_within
       simpa [Q, F] using hInv
     simp only [Function.comp_apply, hQF]
 
-  have hleft := intervalIntegral.integral_congr hintegrand
-  rw [hleft] at hsub
-  simpa [F, Q, f] using hsub.symm
+  change (∫ u : ℝ in F ε..F R, Real.log (Q u)) =
+    ∫ x : ℝ in ε..R, Real.log x * f x
+  calc
+    _ = ∫ x : ℝ in ε..R,
+        ((fun u : ℝ => Real.log (Q u)) ∘ F) x * f x := hsub.symm
+    _ = _ := intervalIntegral.integral_congr hintegrand
 
 end ScoreCurvatureStarOrder
