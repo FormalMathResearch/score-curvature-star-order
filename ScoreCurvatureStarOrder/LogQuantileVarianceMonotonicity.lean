@@ -100,7 +100,7 @@ theorem unitInterval_variance_le_of_monotoneOn_increment
           ∫ u : ℝ in Set.Ioo (0 : ℝ) 1,
             (f u) ^ 2 + (2 * (f u * h u) + h u * h u) := by
         apply integral_congr_ae
-        exact Eventually.of_forall (fun u => by
+        exact Filter.Eventually.of_forall (fun u => by
           dsimp [h]
           ring)
       _ =
