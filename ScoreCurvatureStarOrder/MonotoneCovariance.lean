@@ -81,7 +81,7 @@ theorem unitIntervalCovariance_nonneg_of_monotoneOn
       _ =
           (∫ y : ℝ in Set.Ioo (0 : ℝ) 1, f x * g x - f x * g y) -
             (∫ y : ℝ in Set.Ioo (0 : ℝ) 1, f y * g x - f y * g y) := by
-        rw [integral_sub (hconst.sub hfxg) (hfgx.sub hfg)]
+        exact integral_sub (hconst.sub hfxg) (hfgx.sub hfg)
       _ =
           ((∫ y : ℝ in Set.Ioo (0 : ℝ) 1, f x * g x) -
               ∫ y : ℝ in Set.Ioo (0 : ℝ) 1, f x * g y) -
