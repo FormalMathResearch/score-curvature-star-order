@@ -40,3 +40,4 @@ import ScoreCurvatureStarOrder.Quantile
 import ScoreCurvatureStarOrder.QuantileShiftContinuity
 import ScoreCurvatureStarOrder.QuantileShiftDerivative
 import ScoreCurvatureStarOrder.QuantileLogDerivative
+import ScoreCurvatureStarOrder.QuantileRatioMonotonicity
