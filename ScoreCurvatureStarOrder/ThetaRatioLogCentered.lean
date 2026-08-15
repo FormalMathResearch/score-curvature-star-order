@@ -214,7 +214,7 @@ theorem powerWeightedShift_thetaRatio_log_centered_integral_neg_within
 
   have hFpos : 0 < ∫ x : ℝ in Set.Ioi 0, F x := by
     rw [setIntegral_pos_iff_support_of_nonneg_ae]
-    · exact hsupport_ne
+    · exact pos_iff_ne_zero.mpr hsupport_ne
     · exact hFnonneg
     · exact hFint
 
