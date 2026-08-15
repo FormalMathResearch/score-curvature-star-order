@@ -36,7 +36,7 @@ theorem powerWeightedShift_thetaRatio_strictAntiOn_Ioi_within
   have ha₂ : 0 ≤ a₂ := ha₁.trans ha₁₂.le
 
   have hSmono : StrictMonoOn S (Set.Ici (0 : ℝ)) := by
-    refine strictMonoOn_of_hasDerivWithinAt_pos
+    refine strictMonoOn_of_hasDerivWithinAt_pos (f' := Sprime)
       (convex_Ici (0 : ℝ))
       (continuousOn_Ici_of_hasDerivWithinAt hS) ?_ ?_
     · intro z hz
