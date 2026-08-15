@@ -222,7 +222,10 @@ theorem powerWeightedShift_thetaRatio_log_centered_integral_neg_within
       (∫ x : ℝ in Set.Ioi 0, F x) =
         -(∫ x : ℝ in Set.Ioi 0,
           (r x - r c) * (Real.log x - m) * rho x) := by
-    simp [F]
+    dsimp [F]
+    exact integral_neg
+      (μ := volume.restrict (Set.Ioi (0 : ℝ)))
+      (fun x : ℝ => (r x - r c) * (Real.log x - m) * rho x)
   rw [hnegint] at hFpos
   linarith
 
