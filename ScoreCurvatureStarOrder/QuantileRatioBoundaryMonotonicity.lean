@@ -70,9 +70,19 @@ theorem powerWeightedShift_quantileRatio_monotoneOn_Ioo_within
 
   have hsub : Set.Ioi (0 : ℝ) ⊆ Set.Ici (0 : ℝ) := by
     intro b hb
+    change 0 < b at hb
     exact hb.le
   have hfilter : 𝓝[Set.Ioi (0 : ℝ)] 0 ≤ 𝓝[Set.Ici (0 : ℝ)] 0 :=
     nhdsWithin_mono 0 hsub
+
+  change Tendsto
+      (fun b : ℝ => powerWeightedShiftQuantile theta b p u)
+      (𝓝[Set.Ici (0 : ℝ)] 0)
+      (𝓝 (powerWeightedShiftQuantile theta 0 p u)) at hQu_cont
+  change Tendsto
+      (fun b : ℝ => powerWeightedShiftQuantile theta b p v)
+      (𝓝[Set.Ici (0 : ℝ)] 0)
+      (𝓝 (powerWeightedShiftQuantile theta 0 p v)) at hQv_cont
 
   have hQu_lim_Ici :
       Tendsto (fun b : ℝ => Q b u)
@@ -109,6 +119,7 @@ theorem powerWeightedShift_quantileRatio_monotoneOn_Ioo_within
       ∀ᶠ b : ℝ in l,
         Q a₂ u / Q b u ≤ Q a₂ v / Q b v := by
     filter_upwards [self_mem_nhdsWithin, hlt_a₂] with b hbpos hba₂
+    change 0 < b at hbpos
     have hmono := powerWeightedShift_quantileRatio_monotoneOn_Ioo_pos_shifts_within
       (theta := theta) (S := S) (Sprime := Sprime) (Ssecond := Ssecond)
       (a₁ := b) (a₂ := a₂) (p := p)
