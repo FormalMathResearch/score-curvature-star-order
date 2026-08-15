@@ -66,7 +66,6 @@ theorem powerWeightedShift_logQuantile_hasDerivAt_shift_within
     dsimp [powerWeightedShiftCumulativeRadialRatio, A]
     rw [hD]
     field_simp [hqpos.ne', hfpos.ne']
-    ring
 
   change HasDerivAt
     (fun b : ℝ => Real.log (powerWeightedShiftQuantile theta b p u))
