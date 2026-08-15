@@ -75,7 +75,16 @@ theorem powerWeightedShift_quantileRatio_monotoneOn_Ioo_pos_shifts_within
       funext b
       rfl
     rw [← hfun]
-    convert hsub using 1 <;> dsimp [Q, R] <;> ring
+    have hcoef :
+        (-powerWeightedShiftCumulativeRadialRatio theta S a p
+            (powerWeightedShiftQuantile theta a p v)) -
+            (-powerWeightedShiftCumulativeRadialRatio theta S a p
+              (powerWeightedShiftQuantile theta a p u)) =
+          R a (Q a u) - R a (Q a v) := by
+      dsimp [Q, R]
+      ring
+    rw [← hcoef]
+    exact hsub
 
   have hHderiv_nonneg : ∀ a ∈ interior (Set.Icc a₁ a₂), 0 ≤ deriv H a := by
     intro a haInt
