@@ -1,0 +1,167 @@
+import Mathlib
+import ScoreCurvatureStarOrder.PowerLogMoments
+
+namespace ScoreCurvatureStarOrder
+
+open Set MeasureTheory Filter
+open scoped Topology Interval
+
+/-- For every nonnegative shift and every `p > -1`, the normalization moment
+may be differentiated with respect to the power parameter:
+
+`∂ₚ M_p(a) = ∫ x^p log(x) theta(a+x) dx`.
+
+The proof uses a symmetric parameter neighborhood contained in `(-1,∞)`.
+On `0 < x ≤ 1` the derivative is dominated by the lower endpoint power; on
+`x > 1` it is dominated by the upper endpoint power.  The two dominating
+functions are integrable by `powerWeightedShift_log_integrableOn_Ioi_within`.
+-/
+theorem powerWeightedShiftMoment_hasDerivAt_power_within
+    {theta S Sprime : ℝ → ℝ} {a p : ℝ}
+    (ha : 0 ≤ a) (hp : -1 < p)
+    (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
+    (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
+    (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ)))
+    (hS : ∀ z ∈ Set.Ici (0 : ℝ),
+      HasDerivWithinAt S (Sprime z) (Set.Ici (0 : ℝ)) z)
+    (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z) :
+    HasDerivAt
+      (fun q : ℝ => powerWeightedShiftMoment theta a q)
+      (∫ x : ℝ in Set.Ioi 0,
+        x ^ p * Real.log x * theta (a + x)) p := by
+  let δ : ℝ := (p + 1) / 2
+  let plo : ℝ := p - δ
+  let phi : ℝ := p + δ
+  have hδ : 0 < δ := by
+    dsimp [δ]
+    linarith
+  have hplo : -1 < plo := by
+    dsimp [plo, δ]
+    linarith
+  have hphi : -1 < phi := hplo.trans (by
+    dsimp [plo, phi]
+    linarith)
+
+  let s : Set ℝ := Set.Ioo plo phi
+  have hs : s ∈ 𝓝 p := by
+    dsimp [s, plo, phi]
+    exact isOpen_Ioo.mem_nhds ⟨by linarith, by linarith⟩
+
+  let F : ℝ → ℝ → ℝ := fun q x => x ^ q * theta (a + x)
+  let F' : ℝ → ℝ → ℝ := fun q x =>
+    x ^ q * Real.log x * theta (a + x)
+  let bound : ℝ → ℝ := fun x =>
+    if x ≤ 1 then
+      ‖x ^ plo * Real.log x * theta (a + x)‖
+    else
+      ‖x ^ phi * Real.log x * theta (a + x)‖
+
+  have hF_meas :
+      ∀ᶠ q in 𝓝 p,
+        AEStronglyMeasurable (F q) (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    filter_upwards [hs] with q hq
+    have hqgood : -1 < q := hplo.trans hq.1
+    have hint := powerWeightedShift_integrableOn_Ioi_within
+      (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := q)
+      ha hqgood htheta_pos htheta_deriv htheta_int hS hSprime_pos
+    simpa [F] using hint.aestronglyMeasurable
+
+  have hF_int : Integrable (F p) (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    have hint := powerWeightedShift_integrableOn_Ioi_within
+      (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := p)
+      ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
+    simpa [F] using hint
+
+  have hF'_meas :
+      AEStronglyMeasurable (F' p) (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    have hint := powerWeightedShift_log_integrableOn_Ioi_within
+      (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := p)
+      ha hp htheta_pos htheta_deriv htheta_int hS hSprime_pos
+    simpa [F'] using hint.aestronglyMeasurable
+
+  have hlo := powerWeightedShift_log_integrableOn_Ioi_within
+    (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := plo)
+    ha hplo htheta_pos htheta_deriv htheta_int hS hSprime_pos
+  have hhi := powerWeightedShift_log_integrableOn_Ioi_within
+    (theta := theta) (S := S) (Sprime := Sprime) (a := a) (p := phi)
+    ha hphi htheta_pos htheta_deriv htheta_int hS hSprime_pos
+
+  have hbound_set : IntegrableOn bound (Set.Ioi (0 : ℝ)) := by
+    rw [← Ioc_union_Ioi_eq_Ioi (show (0 : ℝ) ≤ 1 by norm_num), integrableOn_union]
+    constructor
+    · have hlo_norm :
+          IntegrableOn
+            (fun x : ℝ => ‖x ^ plo * Real.log x * theta (a + x)‖)
+            (Set.Ioc (0 : ℝ) 1) :=
+        hlo.norm.mono_set (by
+          intro x hx
+          exact hx.1)
+      refine IntegrableOn.congr_fun hlo_norm ?_ measurableSet_Ioc
+      intro x hx
+      simp [bound, hx.2]
+    · have hhi_norm :
+          IntegrableOn
+            (fun x : ℝ => ‖x ^ phi * Real.log x * theta (a + x)‖)
+            (Set.Ioi (1 : ℝ)) :=
+        hhi.norm.mono_set (by
+          intro x hx
+          exact zero_lt_one.trans hx)
+      refine IntegrableOn.congr_fun hhi_norm ?_ measurableSet_Ioi
+      intro x hx
+      have hxnot : ¬ x ≤ 1 := not_le.mpr hx
+      simp [bound, hxnot]
+
+  have h_bound :
+      ∀ᵐ x ∂volume.restrict (Set.Ioi (0 : ℝ)),
+        ∀ q ∈ s, ‖F' q x‖ ≤ bound x := by
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
+    intro q hq
+    have hxpos : 0 < x := hx
+    have hxnonneg : 0 ≤ x := hxpos.le
+    by_cases hx1 : x ≤ 1
+    · have hrpow : x ^ q ≤ x ^ plo :=
+        Real.rpow_le_rpow_of_exponent_ge hxpos hx1 hq.1.le
+      calc
+        ‖F' q x‖ = x ^ q * ‖Real.log x * theta (a + x)‖ := by
+          dsimp [F']
+          rw [mul_assoc, norm_mul, Real.norm_eq_abs,
+            abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
+        _ ≤ x ^ plo * ‖Real.log x * theta (a + x)‖ :=
+          mul_le_mul_of_nonneg_right hrpow (norm_nonneg _)
+        _ = ‖x ^ plo * Real.log x * theta (a + x)‖ := by
+          rw [mul_assoc, norm_mul, Real.norm_eq_abs,
+            abs_of_nonneg (Real.rpow_nonneg hxnonneg plo)]
+        _ = bound x := by simp [bound, hx1]
+    · have hx1lt : 1 < x := lt_of_not_ge hx1
+      have hrpow : x ^ q ≤ x ^ phi :=
+        Real.rpow_le_rpow_of_exponent_le hx1lt.le hq.2.le
+      calc
+        ‖F' q x‖ = x ^ q * ‖Real.log x * theta (a + x)‖ := by
+          dsimp [F']
+          rw [mul_assoc, norm_mul, Real.norm_eq_abs,
+            abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
+        _ ≤ x ^ phi * ‖Real.log x * theta (a + x)‖ :=
+          mul_le_mul_of_nonneg_right hrpow (norm_nonneg _)
+        _ = ‖x ^ phi * Real.log x * theta (a + x)‖ := by
+          rw [mul_assoc, norm_mul, Real.norm_eq_abs,
+            abs_of_nonneg (Real.rpow_nonneg hxnonneg phi)]
+        _ = bound x := by simp [bound, hx1]
+
+  have h_diff :
+      ∀ᵐ x ∂volume.restrict (Set.Ioi (0 : ℝ)),
+        ∀ q ∈ s, HasDerivAt (F · x) (F' q x) q := by
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
+    intro q hq
+    have hpow := (Real.hasStrictDerivAt_const_rpow hx q).hasDerivAt
+    have hmul := hpow.mul (hasDerivAt_const q (theta (a + x)))
+    simpa [F, F', mul_assoc] using hmul
+
+  have hparam := hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (F := F) (x₀ := p) (s := s) (bound := bound)
+    (μ := volume.restrict (Set.Ioi (0 : ℝ)))
+    hs hF_meas hF_int hF'_meas h_bound hbound_set h_diff
+
+  simpa [powerWeightedShiftMoment, F, F'] using hparam.2
+
+end ScoreCurvatureStarOrder
