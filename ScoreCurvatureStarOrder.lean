@@ -10,6 +10,7 @@ import ScoreCurvatureStarOrder.Tail
 import ScoreCurvatureStarOrder.Moments
 import ScoreCurvatureStarOrder.ShiftKernelAsymptotics
 import ScoreCurvatureStarOrder.PowerLogMoments
+import ScoreCurvatureStarOrder.PowerMomentDerivative
 import ScoreCurvatureStarOrder.ShiftBoundaryContinuity
 import ScoreCurvatureStarOrder.Boundary
 import ScoreCurvatureStarOrder.ScoreIntegrability
