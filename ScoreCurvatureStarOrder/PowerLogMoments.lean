@@ -74,7 +74,7 @@ theorem powerWeightedShift_log_integrableOn_Ioi_within
   have hlog_local :
       LocallyIntegrableOn (fun x : ℝ => Real.log x * f x) (Set.Ioi (0 : ℝ)) := by
     have hlog_cont : ContinuousOn Real.log (Set.Ioi (0 : ℝ)) :=
-      continuousOn_log.mono
+      Real.continuousOn_log.mono
         (subset_compl_singleton_iff.mpr self_notMem_Ioi)
     exact hfc.continuousOn_mul hlog_cont isOpen_Ioi.isLocallyClosed
 
@@ -123,7 +123,7 @@ theorem powerWeightedShift_log_sq_integrableOn_Ioi_within
       (shiftedTheta_locallyIntegrableOn_Ioi_within
         (theta := theta) (S := S) (a := a) ha htheta_deriv)
   have hlog_cont : ContinuousOn Real.log (Set.Ioi (0 : ℝ)) :=
-    continuousOn_log.mono
+    Real.continuousOn_log.mono
       (subset_compl_singleton_iff.mpr self_notMem_Ioi)
   have hg_local : LocallyIntegrableOn g (Set.Ioi (0 : ℝ)) := by
     simpa [g] using hfc.continuousOn_mul hlog_cont isOpen_Ioi.isLocallyClosed
