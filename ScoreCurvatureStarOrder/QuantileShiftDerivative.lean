@@ -45,11 +45,11 @@ theorem powerWeightedShiftDensity_continuousAt_prod_within
     continuousAt_fst.add continuousAt_snd
   have htheta_comp :
       ContinuousAt (fun z : ℝ × ℝ => theta (z.1 + z.2)) (a, x) :=
-    htheta_at.comp harg
+    htheta_at.comp (a, x) harg
   have hpow : ContinuousAt (fun z : ℝ × ℝ => z.2 ^ p) (a, x) :=
     continuousAt_snd.rpow_const (Or.inl hx.ne')
   have hMpair : ContinuousAt (fun z : ℝ × ℝ => M z.1) (a, x) :=
-    hMcont.comp continuousAt_fst
+    hMcont.comp (a, x) continuousAt_fst
   have hquot := (hpow.mul htheta_comp).div hMpair hMpos.ne'
   simpa [powerWeightedShiftDensity, M] using hquot
 
@@ -190,10 +190,13 @@ theorem powerWeightedShiftQuantile_hasDerivAt_shift_within
   choose c hc using hsecAll
 
   have hc_tend : Tendsto c (𝓝 a) (𝓝 q) := by
+    have hconstq : Tendsto (fun _ : ℝ => q) (𝓝 a) (𝓝 q) := tendsto_const_nhds
     have hmin : Tendsto (fun b : ℝ => min q (Q b)) (𝓝 a) (𝓝 q) := by
-      simpa using (tendsto_const_nhds.min hQcont)
+      have h := hconstq.min hQcont
+      simpa [q] using h
     have hmax : Tendsto (fun b : ℝ => max q (Q b)) (𝓝 a) (𝓝 q) := by
-      simpa using (tendsto_const_nhds.max hQcont)
+      have h := hconstq.max hQcont
+      simpa [q] using h
     apply tendsto_of_tendsto_of_tendsto_of_le_of_le' hmin hmax
     · filter_upwards [Ioi_mem_nhds ha] with b hb
       have hcb := (hc b hb).1
@@ -207,12 +210,13 @@ theorem powerWeightedShiftQuantile_hasDerivAt_shift_within
   have hdpair : Tendsto (fun b : ℝ => d b (c b)) (𝓝 a) (𝓝 (d a q)) := by
     have hpair : Tendsto (fun b : ℝ => (b, c b)) (𝓝 a) (𝓝 (a, q)) :=
       tendsto_id.prodMk_nhds hc_tend
-    exact hdjoint.comp hpair
+    exact hdjoint.comp a hpair
 
-  have hslope_eq : ∀ᶠ b : ℝ in 𝓝[≠] a,
-      slope Q a b = -(slope (fun y : ℝ => F y q) a b) / d b (c b) := by
+  have hslope_eq :
+      (slope Q a) =ᶠ[𝓝[≠] a]
+        (fun b : ℝ => -(slope (fun y : ℝ => F y q) a b) / d b (c b)) := by
     have hbpos : ∀ᶠ b : ℝ in 𝓝[≠] a, 0 < b :=
-      (Ioi_mem_nhds ha).filter_mono inf_le_left
+      mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds ha)
     have hbne : ∀ᶠ b : ℝ in 𝓝[≠] a, b ≠ a := by
       filter_upwards [self_mem_nhdsWithin] with b hb
       simpa using hb
