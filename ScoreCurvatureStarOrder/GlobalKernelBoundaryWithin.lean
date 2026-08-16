@@ -75,7 +75,8 @@ theorem twoPointKernel_nonneg_within
         ContinuousWithinAt
           (fun v : ℝ => twoPointKernel S Sprime a y v)
           (Set.Ioi (0 : ℝ)) u :=
-      (hcont_u u hu).mono (fun v hv => hv.le)
+      (hcont_u u hu).mono (fun v hv =>
+        show v ∈ Set.Ici (0 : ℝ) from (show 0 < v from hv).le)
     exact ContinuousWithinAt.closure_le hu_cl hzero hk (by
       intro v hv
       exact hpospos hy hv)
