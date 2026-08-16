@@ -44,9 +44,9 @@ theorem powerWeightedShift_momentRatio_log_convexOn_power_within
             powerWeightedShiftMoment theta a₁ q)) := by
   have ha₂ : 0 ≤ a₂ := ha₁.trans ha₁₂.le
 
-  let F : ℝ → ℝ := fun q =>
-    Real.log (powerWeightedShiftMoment theta a₂ q) -
-      Real.log (powerWeightedShiftMoment theta a₁ q)
+  let F : ℝ → ℝ :=
+    (fun q : ℝ => Real.log (powerWeightedShiftMoment theta a₂ q)) -
+      (fun q : ℝ => Real.log (powerWeightedShiftMoment theta a₁ q))
   let E₂ : ℝ → ℝ :=
     ((fun q : ℝ =>
         ∫ x : ℝ in Set.Ioi 0,
