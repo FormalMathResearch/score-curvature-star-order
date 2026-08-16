@@ -43,7 +43,7 @@ theorem twoPointKernel_nonneg_within
         0 ≤ twoPointKernel S Sprime a y u := by
     intro y u hy hu
     have hu_cl : u ∈ closure (Set.Ioi (0 : ℝ)) := by
-      simpa only [closure_Ioi] using hu
+      simpa only [closure_Ioi, Set.mem_Ici] using hu
     have hcont_u :
         ContinuousOn
           (fun v : ℝ => twoPointKernel S Sprime a y v)
