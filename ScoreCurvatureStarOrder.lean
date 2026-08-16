@@ -6,6 +6,7 @@ import ScoreCurvatureStarOrder.ScoreRatio
 import ScoreCurvatureStarOrder.ScoreRatioWithin
 import ScoreCurvatureStarOrder.GlobalKernel
 import ScoreCurvatureStarOrder.GlobalKernelWithin
+import ScoreCurvatureStarOrder.GlobalKernelBoundaryWithin
 import ScoreCurvatureStarOrder.Tail
 import ScoreCurvatureStarOrder.Moments
 import ScoreCurvatureStarOrder.ShiftKernelAsymptotics
@@ -33,6 +34,7 @@ import ScoreCurvatureStarOrder.DerivativeTail
 import ScoreCurvatureStarOrder.ShiftDerivativeMajorant
 import ScoreCurvatureStarOrder.LocalShiftMajorant
 import ScoreCurvatureStarOrder.MomentShiftDerivative
+import ScoreCurvatureStarOrder.MomentShiftBoundaryDerivative
 import ScoreCurvatureStarOrder.MomentLogDerivative
 import ScoreCurvatureStarOrder.DensityShiftDerivative
 import ScoreCurvatureStarOrder.RadialDensity
