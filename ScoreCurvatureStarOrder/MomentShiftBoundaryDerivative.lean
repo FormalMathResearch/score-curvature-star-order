@@ -96,7 +96,7 @@ theorem powerWeightedShiftMoment_shiftDerivative_continuousWithinAt_zero_within
         exact hx.ne')
     have hsub : Set.Ioi (0 : ℝ) ⊆ Set.Ici (0 : ℝ) := by
       intro x hx
-      exact hx.le
+      exact (show 0 < x from hx).le
     have hcont : ContinuousOn (F a) (Set.Ioi (0 : ℝ)) := by
       change ContinuousOn
         (fun x : ℝ => x ^ p * (-S (a + x) * theta (a + x))) (Set.Ioi (0 : ℝ))
@@ -218,7 +218,7 @@ theorem powerWeightedShiftMoment_hasDerivWithinAt_zero_within
   have hfcont : ContinuousWithinAt f (Set.Ioi (0 : ℝ)) 0 := by
     have hsub : Set.Ioi (0 : ℝ) ⊆ Set.Ici (0 : ℝ) := by
       intro a ha
-      exact ha.le
+      exact (show 0 < a from ha).le
     simpa [f] using hfcontIci.mono hsub
 
   have hgcontIci :=
@@ -230,7 +230,7 @@ theorem powerWeightedShiftMoment_hasDerivWithinAt_zero_within
       Tendsto g (𝓝[Set.Ioi (0 : ℝ)] 0) (𝓝 (g 0)) := by
     have hsub : Set.Ioi (0 : ℝ) ⊆ Set.Ici (0 : ℝ) := by
       intro a ha
-      exact ha.le
+      exact (show 0 < a from ha).le
     simpa [g] using (hgcontIci.mono hsub).tendsto
 
   have hderiv_eq :
