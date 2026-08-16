@@ -114,7 +114,8 @@ theorem twoPointKernel_nonneg_within
       ContinuousWithinAt
         (fun y : ℝ => twoPointKernel S Sprime a y t)
         (Set.Ioi (0 : ℝ)) x :=
-    (hcont_x x hx0).mono (fun y hy => hy.le)
+    (hcont_x x hx0).mono (fun y hy =>
+      show y ∈ Set.Ici (0 : ℝ) from (show 0 < y from hy).le)
   exact ContinuousWithinAt.closure_le hx_cl hzero hk (by
     intro y hy
     exact hpos_all hy ht0)
