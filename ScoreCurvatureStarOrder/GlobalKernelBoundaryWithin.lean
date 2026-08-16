@@ -48,18 +48,26 @@ theorem twoPointKernel_nonneg_within
         ContinuousOn
           (fun v : ℝ => twoPointKernel S Sprime a y v)
           (Set.Ici (0 : ℝ)) := by
+      intro v hv
+      have hSv :
+          ContinuousWithinAt (fun w : ℝ => S (a + w)) (Set.Ici (0 : ℝ)) v :=
+        hSshift v hv
       have hSp_const :
-          ContinuousOn (fun _ : ℝ => Sprime (a + y)) (Set.Ici (0 : ℝ)) :=
-        continuousOn_const
+          ContinuousWithinAt (fun _ : ℝ => Sprime (a + y)) (Set.Ici (0 : ℝ)) v :=
+        continuousWithinAt_const
       have hSy_const :
-          ContinuousOn (fun _ : ℝ => S (a + y)) (Set.Ici (0 : ℝ)) :=
-        continuousOn_const
+          ContinuousWithinAt (fun _ : ℝ => S (a + y)) (Set.Ici (0 : ℝ)) v :=
+        continuousWithinAt_const
       have hlin :
-          ContinuousOn (fun v : ℝ => v - y) (Set.Ici (0 : ℝ)) :=
-        continuousOn_id.sub continuousOn_const
-      have hfirst := (hSp_const.mul hlin).mul hSshift
-      have hsecond := hSy_const.mul (hSshift.sub hSy_const)
-      simpa [twoPointKernel] using hfirst.sub hsecond
+          ContinuousWithinAt (fun w : ℝ => w - y) (Set.Ici (0 : ℝ)) v :=
+        continuousWithinAt_id.sub continuousWithinAt_const
+      change ContinuousWithinAt
+        (fun w : ℝ =>
+          Sprime (a + y) * (w - y) * S (a + w) -
+            S (a + y) * (S (a + w) - S (a + y)))
+        (Set.Ici (0 : ℝ)) v
+      exact ((hSp_const.mul hlin).mul hSv).sub
+        (hSy_const.mul (hSv.sub hSy_const))
     have hzero :
         ContinuousWithinAt (fun _ : ℝ => (0 : ℝ)) (Set.Ioi (0 : ℝ)) u :=
       continuousWithinAt_const
