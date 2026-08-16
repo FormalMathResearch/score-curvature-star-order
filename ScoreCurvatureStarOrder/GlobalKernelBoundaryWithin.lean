@@ -82,7 +82,7 @@ theorem twoPointKernel_nonneg_within
       exact hpospos hy hv)
 
   have hx_cl : x ∈ closure (Set.Ioi (0 : ℝ)) := by
-    simpa only [closure_Ioi] using hx0
+    simpa only [closure_Ioi, Set.mem_Ici] using hx0
   have hcont_x :
       ContinuousOn
         (fun y : ℝ => twoPointKernel S Sprime a y t)
