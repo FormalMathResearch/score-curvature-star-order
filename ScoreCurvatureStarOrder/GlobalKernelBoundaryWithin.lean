@@ -87,15 +87,26 @@ theorem twoPointKernel_nonneg_within
       ContinuousOn
         (fun y : ℝ => twoPointKernel S Sprime a y t)
         (Set.Ici (0 : ℝ)) := by
+    intro y hy
+    have hSpy :
+        ContinuousWithinAt (fun w : ℝ => Sprime (a + w)) (Set.Ici (0 : ℝ)) y :=
+      hSpshift y hy
+    have hSy :
+        ContinuousWithinAt (fun w : ℝ => S (a + w)) (Set.Ici (0 : ℝ)) y :=
+      hSshift y hy
     have hSt_const :
-        ContinuousOn (fun _ : ℝ => S (a + t)) (Set.Ici (0 : ℝ)) :=
-      continuousOn_const
+        ContinuousWithinAt (fun _ : ℝ => S (a + t)) (Set.Ici (0 : ℝ)) y :=
+      continuousWithinAt_const
     have hlin :
-        ContinuousOn (fun y : ℝ => t - y) (Set.Ici (0 : ℝ)) :=
-      continuousOn_const.sub continuousOn_id
-    have hfirst := (hSpshift.mul hlin).mul hSt_const
-    have hsecond := hSshift.mul (hSt_const.sub hSshift)
-    simpa [twoPointKernel] using hfirst.sub hsecond
+        ContinuousWithinAt (fun w : ℝ => t - w) (Set.Ici (0 : ℝ)) y :=
+      continuousWithinAt_const.sub continuousWithinAt_id
+    change ContinuousWithinAt
+      (fun w : ℝ =>
+        Sprime (a + w) * (t - w) * S (a + t) -
+          S (a + w) * (S (a + t) - S (a + w)))
+      (Set.Ici (0 : ℝ)) y
+    exact ((hSpy.mul hlin).mul hSt_const).sub
+      (hSy.mul (hSt_const.sub hSy))
   have hzero :
       ContinuousWithinAt (fun _ : ℝ => (0 : ℝ)) (Set.Ioi (0 : ℝ)) x :=
     continuousWithinAt_const
