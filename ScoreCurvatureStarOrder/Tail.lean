@@ -18,7 +18,7 @@ theorem exists_score_pos_of_integrable
     (htheta_int : IntegrableOn theta (Set.Ici (0 : ℝ))) :
     ∃ R ∈ Set.Ici (0 : ℝ), 0 < S R := by
   by_contra hpos
-  push_neg at hpos
+  push Not at hpos
   have hcont : ContinuousOn theta (Set.Ici (0 : ℝ)) :=
     continuousOn_Ici_of_hasDerivWithinAt htheta_deriv
   have hder :
@@ -49,7 +49,7 @@ theorem exists_score_pos_of_integrable
   · have h0pos : 0 < theta 0 := htheta_pos 0 (by simp)
     have h0ne : theta 0 ≠ 0 := ne_of_gt h0pos
     exact h0ne (by simpa using hzero)
-  · simpa using hfinite
+  · simp at hfinite
 
 /-- Under positive score derivative, the score is eventually bounded below by a
 strictly positive constant. Score differentiability is only assumed within the
@@ -104,7 +104,7 @@ exponential tail bound directly via monotonicity of `x ↦ exp(c x) θ(x)`.
 The boundary derivative of `theta` is only a within-derivative on `[0, ∞)`. -/
 theorem theta_le_exp_tail
     {theta S : ℝ → ℝ} {R c : ℝ}
-    (hR : 0 ≤ R) (hc : 0 < c)
+    (hR : 0 ≤ R) (_hc : 0 < c)
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
     (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
       HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
