@@ -17,7 +17,7 @@ The proof is purely algebraic.  On `(0,∞)` the positive factor
 then the constant `M_p(a₁)⁻¹` is pulled out of the integral. -/
 theorem powerWeightedShift_momentRatio_eq_thetaRatio_expectation_within
     {theta S Sprime : ℝ → ℝ} {a₁ a₂ p : ℝ}
-    (ha₁ : 0 ≤ a₁) (ha₁₂ : a₁ < a₂) (hp : -1 < p)
+    (ha₁ : 0 ≤ a₁) (_ha₁₂ : a₁ < a₂) (hp : -1 < p)
     (htheta_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < theta z)
     (htheta_deriv : ∀ z ∈ Set.Ici (0 : ℝ),
       HasDerivWithinAt theta (-S z * theta z) (Set.Ici (0 : ℝ)) z)
@@ -56,7 +56,6 @@ theorem powerWeightedShift_momentRatio_eq_thetaRatio_expectation_within
           (htheta_pos (a₁ + x) hax₁).ne'
         dsimp [powerWeightedShiftDensity]
         field_simp [ht₁, hM₁ne]
-        <;> ring
       _ = (powerWeightedShiftMoment theta a₁ p)⁻¹ *
           ∫ x : ℝ in Set.Ioi 0, x ^ p * theta (a₂ + x) := by
         rw [integral_const_mul]
