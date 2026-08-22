@@ -116,18 +116,20 @@ theorem exists_powerWeightedShift_log_compact_majorant_within
   have hbound_int : IntegrableOn bound (Set.Ioi (0 : ℝ)) := by
     rw [← Ioc_union_Ioi_eq_Ioi (show (0 : ℝ) ≤ 1 by norm_num), integrableOn_union]
     constructor
-    · have hlocal₀ := hnorm₀.mono_set (by
+    · have hIoc01_sub : Set.Ioc (0 : ℝ) 1 ⊆ Set.Ioi (0 : ℝ) := by
         intro x hx
-        exact hx.1)
+        exact hx.1
+      have hlocal₀ := hnorm₀.mono_set hIoc01_sub
       have hscaled₀ := hlocal₀.const_mul D
       refine IntegrableOn.congr_fun hscaled₀ ?_ measurableSet_Ioc
       intro x hx
       simp [bound, hx.2]
     · rw [← Ioc_union_Ioi_eq_Ioi h1B, integrableOn_union]
       constructor
-      · have hmid₁ := hnorm₁.mono_set (by
+      · have hIoc1B_sub : Set.Ioc (1 : ℝ) B ⊆ Set.Ioi (0 : ℝ) := by
           intro x hx
-          exact zero_lt_one.trans hx.1)
+          exact zero_lt_one.trans hx.1
+        have hmid₁ := hnorm₁.mono_set hIoc1B_sub
         have hscaled₁ := hmid₁.const_mul D
         refine IntegrableOn.congr_fun hscaled₁ ?_ measurableSet_Ioc
         intro x hx
