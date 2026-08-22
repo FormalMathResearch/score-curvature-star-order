@@ -160,7 +160,16 @@ theorem powerWeightedShiftMoment_shiftDerivative_continuousWithinAt_zero_within
     have htheta0 :
         ContinuousWithinAt (fun a : ℝ => theta (a + x)) (Set.Ici (0 : ℝ)) 0 := by
       simpa [add_comm] using hthetashift 0 (by simp)
-    have hprod := continuousWithinAt_const.mul (hS0.neg.mul htheta0)
+    have hpow_const :
+        ContinuousWithinAt
+          (fun _ : ℝ => x ^ p)
+          (Set.Ici (0 : ℝ)) 0 :=
+      continuousWithinAt_const
+    have hprod :
+        ContinuousWithinAt
+          (fun a : ℝ => x ^ p * (-S (a + x) * theta (a + x)))
+          (Set.Ici (0 : ℝ)) 0 :=
+      hpow_const.mul (hS0.neg.mul htheta0)
     simpa [F] using hprod
 
   have hdom :=
