@@ -14,7 +14,42 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - name: Source integrity audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' lean_files < <(find . -path './.lake' -prune -o -name '*.lean' -print0)
+          if grep -nH -E '(^|[^[:alnum:]_])(sorry|admit|sorryAx|axiom)([^[:alnum:]_]|$)' "${lean_files[@]}"; then
+            echo '::error::Found a proof placeholder or explicit axiom token in repository Lean sources.'
+            exit 1
+          fi
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: true
+          use-github-cache: false
+          use-mathlib-cache: true
+          leanchecker: true
+
+  # GitHub's default pull-request checkout verifies the synthetic merge ref above.
+  # Verify the immutable submitted head SHA independently for publication provenance.
+  build-pr-head:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Source integrity audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' lean_files < <(find . -path './.lake' -prune -o -name '*.lean' -print0)
+          if grep -nH -E '(^|[^[:alnum:]_])(sorry|admit|sorryAx|axiom)([^[:alnum:]_]|$)' "${lean_files[@]}"; then
+            echo '::error::Found a proof placeholder or explicit axiom token in repository Lean sources.'
+            exit 1
+          fi
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
