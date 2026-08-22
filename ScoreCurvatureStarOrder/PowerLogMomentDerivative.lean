@@ -150,7 +150,6 @@ theorem powerWeightedShift_logMoment_hasDerivAt_power_within
       have hnorm_q :
           ‖F' q x‖ = x ^ q * (|Real.log x| ^ 2 * |theta (a + x)|) := by
         dsimp [F']
-        change |x ^ q * (Real.log x) ^ 2 * theta (a + x)| = _
         rw [abs_mul, abs_mul, abs_pow,
           abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
         ring
@@ -173,7 +172,6 @@ theorem powerWeightedShift_logMoment_hasDerivAt_power_within
       have hnorm_q :
           ‖F' q x‖ = x ^ q * (|Real.log x| ^ 2 * |theta (a + x)|) := by
         dsimp [F']
-        change |x ^ q * (Real.log x) ^ 2 * theta (a + x)| = _
         rw [abs_mul, abs_mul, abs_pow,
           abs_of_nonneg (Real.rpow_nonneg hxnonneg q)]
         ring
