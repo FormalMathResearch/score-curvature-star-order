@@ -76,7 +76,6 @@ theorem powerWeightedShift_thetaRatio_log_centered_integral_neg_within
       (htheta_pos (a₁ + x) hax₁).ne'
     dsimp [r, rho, powerWeightedShiftDensity]
     field_simp [ht₁, hM₁ne]
-    <;> ring
 
   have hrawlog₂ :
       IntegrableOn
@@ -98,7 +97,6 @@ theorem powerWeightedShift_thetaRatio_log_centered_integral_neg_within
       (htheta_pos (a₁ + x) hax₁).ne'
     dsimp [r, rho, powerWeightedShiftDensity]
     field_simp [ht₁, hM₁ne]
-    <;> ring
 
   have hranti : StrictAntiOn r (Set.Ioi (0 : ℝ)) := by
     simpa [r] using
