@@ -147,7 +147,8 @@ theorem twoPointKernel_nonneg_of_curvature_on
   have hlog :
       Real.log (S (a + t) / S (a + x)) ≤
         (Sprime (a + x) / S (a + x)) * (t - x) := by
-    convert hlog0 using 1 <;> ring
+    convert hlog0 using 1
+    all_goals ring
   exact
     twoPointKernel_nonneg_of_log_ratio
       (hSnz (a + x) hax) hr hlog
