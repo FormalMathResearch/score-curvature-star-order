@@ -68,7 +68,6 @@ theorem powerWeightedShift_thetaRatio_log_expectation_eq_logMomentRatio
       dsimp [powerWeightedShiftDensity]
       rw [div_eq_mul_inv]
       field_simp [ht₁]
-      <;> ring
     _ = (powerWeightedShiftMoment theta a₁ p)⁻¹ *
         ∫ x : ℝ in Set.Ioi 0,
           x ^ p * Real.log x * theta (a₂ + x) := by
@@ -191,7 +190,6 @@ theorem powerWeightedShift_momentRatio_powerDerivative_neg_within
       (htheta_pos (a₁ + x) hax₁).ne'
     dsimp [r, rho, powerWeightedShiftDensity]
     field_simp [ht₁, hM₁ne]
-    <;> ring
 
   have hrawlog₂ :
       IntegrableOn
@@ -213,7 +211,6 @@ theorem powerWeightedShift_momentRatio_powerDerivative_neg_within
       (htheta_pos (a₁ + x) hax₁).ne'
     dsimp [r, rho, powerWeightedShiftDensity]
     field_simp [ht₁, hM₁ne]
-    <;> ring
 
   have hrho_one : (∫ x : ℝ in Set.Ioi 0, rho x) = 1 := by
     simpa [rho] using
@@ -386,7 +383,6 @@ theorem powerWeightedShift_momentRatio_powerDerivative_neg_within
               x ^ p * Real.log x * theta (a₁ + x))) /
           (powerWeightedShiftMoment theta a₁ p) ^ 2) := by
         field_simp [hM₁ne]
-        <;> ring
 
   rw [hcenter_deriv] at hcenter
   exact hcenter
