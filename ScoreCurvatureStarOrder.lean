@@ -11,6 +11,7 @@ import ScoreCurvatureStarOrder.Tail
 import ScoreCurvatureStarOrder.Moments
 import ScoreCurvatureStarOrder.ShiftKernelAsymptotics
 import ScoreCurvatureStarOrder.PowerLogMoments
+import ScoreCurvatureStarOrder.CompactParameterMajorants
 import ScoreCurvatureStarOrder.PowerMomentDerivative
 import ScoreCurvatureStarOrder.PowerMomentLogDerivative
 import ScoreCurvatureStarOrder.PowerLogMomentDerivative
