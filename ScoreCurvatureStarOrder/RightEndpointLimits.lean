@@ -107,8 +107,7 @@ theorem powerWeightedShift_cumulative_and_radial_tendsto_atTop_zero_within
   have htail :
       Tendsto (fun x : ℝ => ∫ t : ℝ in Set.Ioi x, h t) atTop (𝓝 0) := by
     have hanti : Antitone (fun x : ℝ => Set.Ioi x) := by
-      intro x y hxy
-      intro t ht
+      intro x y hxy t ht
       exact hxy.trans_lt ht
     have hlim := tendsto_setIntegral_of_antitone
       (f := h) (μ := volume) (s := fun x : ℝ => Set.Ioi x)
