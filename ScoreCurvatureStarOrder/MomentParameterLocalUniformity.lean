@@ -71,7 +71,7 @@ theorem exists_powerWeightedShift_parameterDerivative_local_majorants_within
     (hSprime_pos : ∀ z ∈ Set.Ici (0 : ℝ), 0 < Sprime z)
     (hcurv : ∀ z ∈ Set.Ici (0 : ℝ),
       Ssecond z * S z - (Sprime z) ^ 2 ≤ 0) :
-    ∃ p₀ p₁ A boundP boundPP boundA : ℝ,
+    ∃ p₀ p₁ A : ℝ, ∃ boundP boundPP boundA : ℝ → ℝ,
       -1 < p₀ ∧ p₀ < p ∧ p < p₁ ∧ 0 ≤ A ∧ a < A ∧
       IntegrableOn boundP (Set.Ioi (0 : ℝ)) ∧
       IntegrableOn boundPP (Set.Ioi (0 : ℝ)) ∧
