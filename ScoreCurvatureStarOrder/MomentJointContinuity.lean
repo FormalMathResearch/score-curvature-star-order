@@ -115,7 +115,7 @@ theorem powerWeightedShiftMoment_continuousWithinAt_parameters_within
     have hshift : ContinuousAt (fun q : ℝ × ℝ => theta (q.2 + x)) (p, a) := by
       have harg : ContinuousAt (fun q : ℝ × ℝ => q.2 + x) (p, a) := by
         fun_prop
-      exact htheta_at.comp harg
+      exact htheta_at.comp (p, a) harg
     exact (hpow.mul hshift).continuousWithinAt
 
   have hDCT := MeasureTheory.continuousWithinAt_of_dominated
